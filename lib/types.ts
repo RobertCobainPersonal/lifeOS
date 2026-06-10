@@ -1,7 +1,7 @@
 export interface Capture {
   id: string
   raw_text: string
-  source: 'manual' | 'share' | 'voice' | 'email'
+  source: 'manual' | 'share' | 'voice' | 'email' | null
   url: string | null
   created_at: string
   triaged_at: string | null
