@@ -48,13 +48,35 @@ create table settings (
 
 insert into settings (id) values (1);
 
--- RLS: single-user app — any authenticated user owns all rows
+-- Enable Row Level Security
 alter table captures enable row level security;
 alter table tasks enable row level security;
 alter table clickup_tasks enable row level security;
 alter table settings enable row level security;
 
-create policy "authenticated users" on captures for all using (auth.role() = 'authenticated');
-create policy "authenticated users" on tasks for all using (auth.role() = 'authenticated');
-create policy "authenticated users" on clickup_tasks for all using (auth.role() = 'authenticated');
-create policy "authenticated users" on settings for all using (auth.role() = 'authenticated');
+-- RLS policies
+create policy "authenticated users" on captures for all using ((select auth.uid()) is not null);
+create policy "authenticated users" on tasks for all using ((select auth.uid()) is not null);
+create policy "read clickup_tasks" on clickup_tasks for select using ((select auth.uid()) is not null);
+create policy "authenticated users" on settings for all using ((select auth.uid()) is not null);
+
+-- Indexes for app query patterns
+create index on tasks (status);
+create index on tasks (is_top3, top3_date) where is_top3 = true;
+create index on captures (created_at) where triaged_at is null;
+
+-- Auto-update last_touched_at on any task edit (drives Slipping detection)
+create or replace function touch_task()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.last_touched_at = now();
+  return new;
+end;
+$$;
+
+create trigger tasks_touch
+  before update on tasks
+  for each row
+  execute function touch_task();
