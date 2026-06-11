@@ -2,12 +2,9 @@
 
 Complete these steps in order. Code has already been pushed to GitHub and Netlify is deploying.
 
-## Step 1: Get your Netlify URL
+## ~~Step 1: Get your Netlify URL~~ ✓
 
-1. Open [Netlify dashboard](https://app.netlify.com)
-2. Find the LifeOS site
-3. Copy the site URL (e.g., `https://lifeos-abc123.netlify.app`)
-4. Replace `[NETLIFY_URL]` in all commands below with this URL
+Site URL: **`https://rc-lifeos.netlify.app`**
 
 ## Step 2: Add env var in Netlify
 
@@ -26,9 +23,9 @@ Complete these steps in order. Code has already been pushed to GitHub and Netlif
 Once deployed, open Terminal and run:
 
 ```bash
-TOKEN=<paste your CAPTURE_API_TOKEN from .env.local here>
+TOKEN=$(grep CAPTURE_API_TOKEN /Users/robertcobain/Developer/personal/lifeOS/.env.local | cut -d= -f2)
 
-curl -s -X POST https://[NETLIFY_URL]/api/capture \
+curl -s -X POST https://rc-lifeos.netlify.app/api/capture \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"text": "live API test from curl", "source": "manual"}'
@@ -66,7 +63,7 @@ If you get a 500 error, the `SUPABASE_SERVICE_ROLE_KEY` env var was not set corr
 
 1. Tap **Add action**
 2. Search for **Get Contents of URL**
-3. Set **URL** to: `https://[NETLIFY_URL]/api/capture`
+3. Set **URL** to: `https://rc-lifeos.netlify.app/api/capture`
 4. Tap **Show More**
 5. Set **Method** to **POST**
 6. Tap **+ Headers** twice to add two headers:
@@ -123,7 +120,7 @@ If you get a 500 error, the `SUPABASE_SERVICE_ROLE_KEY` env var was not set corr
 
 1. Tap **Add action**
 2. Search for **Get Contents of URL**
-3. Set **URL** to: `https://[NETLIFY_URL]/api/capture`
+3. Set **URL** to: `https://rc-lifeos.netlify.app/api/capture`
 4. Tap **Show More**
 5. Set **Method** to **POST**
 6. Tap **+ Headers** twice:
