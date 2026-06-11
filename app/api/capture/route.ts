@@ -3,8 +3,12 @@ import { NextResponse } from 'next/server'
 import { timingSafeEqual } from 'crypto'
 
 function verifyToken(provided: string, expected: string): boolean {
-  if (provided.length !== expected.length) return false
-  return timingSafeEqual(Buffer.from(provided), Buffer.from(expected))
+  const a = Buffer.from(provided)
+  const b = Buffer.from(expected)
+  const len = Math.max(a.length, b.length)
+  const aPadded = Buffer.concat([a, Buffer.alloc(len - a.length)])
+  const bPadded = Buffer.concat([b, Buffer.alloc(len - b.length)])
+  return timingSafeEqual(aPadded, bPadded) && a.length === b.length
 }
 
 export async function POST(request: Request) {
@@ -20,7 +24,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'text is required' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
   if (!body.text?.trim()) {
