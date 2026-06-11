@@ -10,10 +10,12 @@ export default async function TodayPage() {
 
   if (!user) redirect('/auth')
 
-  const { count } = await supabase
+  const { count, error: countError } = await supabase
     .from('captures')
     .select('*', { count: 'exact', head: true })
     .is('triaged_at', null)
+
+  if (countError) throw countError
 
   const inboxCount = count ?? 0
 
