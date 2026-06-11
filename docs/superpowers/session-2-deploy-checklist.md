@@ -19,6 +19,8 @@ Complete these steps in order. Code has already been pushed to GitHub and Netlif
 4. Go to **Deploys** → **Trigger deploy** → **Deploy site**
 5. Wait for the deploy to complete (status shows "Published")
 
+**Also verify:** `CAPTURE_API_TOKEN` is already in Netlify env vars (added in Session 1). If not, add it with the same value as in your local `.env.local`.
+
 ## Step 3: Smoke-test the live API
 
 Once deployed, open Terminal and run:
@@ -166,7 +168,7 @@ You now have three ways to capture:
 - **Voice dictation** (home screen icon) ✓
 
 Check the Supabase `captures` table. You should see rows with `source` values of:
-- `web` (from the in-app quick-add)
+- `manual` (from the in-app quick-add)
 - `share` (from the iOS Share Sheet)
 - `voice` (from the iOS Voice shortcut)
 

@@ -37,7 +37,7 @@ export default function QuickAdd({ inboxCount }: QuickAddProps) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 sm:static sm:mb-6 bg-gray-900 border-t border-gray-800 sm:border sm:rounded-xl px-4 py-3 pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed bottom-0 left-0 right-0 z-50 sm:static sm:mb-6 bg-gray-900 border-t border-gray-800 sm:border sm:rounded-xl px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
       <form onSubmit={handleSubmit} className="flex items-center gap-3">
         <input
           type="text"
@@ -53,6 +53,14 @@ export default function QuickAdd({ inboxCount }: QuickAddProps) {
             {inboxCount} in inbox
           </span>
         )}
+        <button
+          type="submit"
+          disabled={!value.trim() || isPending}
+          className="shrink-0 text-blue-500 disabled:text-gray-600 text-sm font-medium transition-colors"
+          aria-label="Capture"
+        >
+          ↑
+        </button>
       </form>
       {error && <p role="alert" className="text-red-400 text-xs mt-1">{error}</p>}
     </div>
