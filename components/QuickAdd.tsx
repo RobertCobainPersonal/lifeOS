@@ -11,18 +11,21 @@ interface QuickAddProps {
 export default function QuickAdd({ inboxCount }: QuickAddProps) {
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
+  const [isPending, setIsPending] = useState(false)
   const router = useRouter()
 
   async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
-    if (!value.trim()) return
+    if (!value.trim() || isPending) return
 
     setError('')
+    setIsPending(true)
     const supabase = createClient()
     const { error: insertError } = await supabase.from('captures').insert({
       raw_text: value.trim(),
       source: 'manual',
     })
+    setIsPending(false)
 
     if (insertError) {
       setError('Failed to save — try again')
@@ -34,14 +37,15 @@ export default function QuickAdd({ inboxCount }: QuickAddProps) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 sm:static sm:mb-6 bg-gray-900 border-t border-gray-800 sm:border sm:rounded-xl px-4 py-3 sm:px-4 sm:py-3">
+    <div className="fixed bottom-0 left-0 right-0 z-50 sm:static sm:mb-6 bg-gray-900 border-t border-gray-800 sm:border sm:rounded-xl px-4 py-3 pb-[env(safe-area-inset-bottom)]">
       <form onSubmit={handleSubmit} className="flex items-center gap-3">
         <input
           type="text"
           value={value}
-          onChange={e => setValue(e.target.value)}
+          onChange={e => { setValue(e.target.value); if (error) setError('') }}
           placeholder="Capture a thought…"
           autoComplete="off"
+          disabled={isPending}
           className="flex-1 bg-transparent text-white placeholder-gray-500 text-base focus:outline-none"
         />
         {inboxCount > 0 && (
@@ -50,7 +54,7 @@ export default function QuickAdd({ inboxCount }: QuickAddProps) {
           </span>
         )}
       </form>
-      {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+      {error && <p role="alert" className="text-red-400 text-xs mt-1">{error}</p>}
     </div>
   )
 }
