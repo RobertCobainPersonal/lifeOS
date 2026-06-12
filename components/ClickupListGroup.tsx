@@ -1,8 +1,4 @@
-'use client'
-
-import { useState } from 'react'
-
-interface Task {
+export interface ClickupTask {
   clickup_id: string
   title: string
   status: string | null
@@ -13,23 +9,23 @@ interface Task {
 
 interface ClickupListGroupProps {
   listName: string
-  tasks: Task[]
+  tasks: ClickupTask[]
   today: string
-  defaultExpanded?: boolean
+  expanded: boolean
+  onToggle: () => void
 }
 
 export default function ClickupListGroup({
   listName,
   tasks,
   today,
-  defaultExpanded = true,
+  expanded,
+  onToggle,
 }: ClickupListGroupProps) {
-  const [expanded, setExpanded] = useState(defaultExpanded)
-
   return (
     <section className="mb-4">
       <button
-        onClick={() => setExpanded(e => !e)}
+        onClick={onToggle}
         className="w-full flex items-center justify-between px-1 py-2 active:opacity-70 transition-opacity"
       >
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">

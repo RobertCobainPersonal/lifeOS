@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import ClickupRefreshButton from '@/components/ClickupRefreshButton'
-import ClickupListGroup from '@/components/ClickupListGroup'
+import ClickupTaskList from '@/components/ClickupTaskList'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,15 +90,7 @@ export default async function ClickupPage() {
               {tasks.length} open task{tasks.length !== 1 ? 's' : ''}
             </p>
 
-            {/* Group by list — collapsible */}
-            {groupByList(tasks).map(({ listName, items }) => (
-              <ClickupListGroup
-                key={listName}
-                listName={listName}
-                tasks={items}
-                today={today}
-              />
-            ))}
+            <ClickupTaskList groups={groupByList(tasks)} today={today} />
           </>
         )}
       </div>
