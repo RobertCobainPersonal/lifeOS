@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { completeTask, addToTop3, removeFromTop3, updateTask } from '@/app/tasks/actions'
 
 interface TaskCardProps {
@@ -220,7 +221,9 @@ export default function TaskCard({
         aria-label={`Mark "${title}" complete`}
       />
       <div className="flex-1 min-w-0">
-        <p className="text-white text-base leading-snug">{title}</p>
+        <Link href={`/tasks/${id}`} className="text-white text-base leading-snug active:text-gray-300 transition-colors">
+          {title}
+        </Link>
         {details && (
           <p className="text-gray-600 text-xs mt-0.5 truncate">{details}</p>
         )}

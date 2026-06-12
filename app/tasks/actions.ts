@@ -84,5 +84,6 @@ export async function updateTask(
   if (error) throw new Error(error.message)
 
   revalidatePath('/tasks')
+  revalidatePath(`/tasks/${taskId}`)
   revalidatePath('/today')
 }
