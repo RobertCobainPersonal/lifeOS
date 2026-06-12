@@ -10,6 +10,8 @@ type TaskRow = {
   energy: string | null
   due_date: string | null
   status: string
+  is_top3: boolean
+  top3_date: string | null
 }
 
 export default async function TasksPage() {
@@ -19,10 +21,12 @@ export default async function TasksPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
 
+  const today = new Date().toISOString().split('T')[0]
+
   const [tasksResult, countResult] = await Promise.all([
     supabase
       .from('tasks')
-      .select('id, title, domain, energy, due_date, status')
+      .select('id, title, domain, energy, due_date, status, is_top3, top3_date')
       .eq('status', 'open')
       .order('due_date', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true }),
@@ -37,6 +41,8 @@ export default async function TasksPage() {
   const tasks: TaskRow[] = tasksResult.data ?? []
   const inboxCount = countResult.count ?? 0
 
+  const top3Count = tasks.filter(t => t.is_top3 && t.top3_date === today).length
+
   const work = tasks.filter(t => t.domain === 'work')
   const personal = tasks.filter(t => t.domain === 'personal')
   const other = tasks.filter(t => !t.domain)
@@ -44,7 +50,14 @@ export default async function TasksPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24">
-        <h1 className="text-2xl font-bold mb-6">Tasks</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Tasks</h1>
+          {top3Count > 0 && (
+            <span className="text-xs text-gray-500">
+              {top3Count}/3 in Top 3 today
+            </span>
+          )}
+        </div>
 
         {tasks.length === 0 ? (
           <div className="text-center py-16">
@@ -55,9 +68,9 @@ export default async function TasksPage() {
           </div>
         ) : (
           <>
-            <TaskGroup label="Work" tasks={work} />
-            <TaskGroup label="Personal" tasks={personal} />
-            <TaskGroup label="Other" tasks={other} />
+            <TaskGroup label="Work" tasks={work} today={today} top3Count={top3Count} />
+            <TaskGroup label="Personal" tasks={personal} today={today} top3Count={top3Count} />
+            <TaskGroup label="Other" tasks={other} today={today} top3Count={top3Count} />
           </>
         )}
       </div>
@@ -67,7 +80,17 @@ export default async function TasksPage() {
   )
 }
 
-function TaskGroup({ label, tasks }: { label: string; tasks: TaskRow[] }) {
+function TaskGroup({
+  label,
+  tasks,
+  today,
+  top3Count,
+}: {
+  label: string
+  tasks: TaskRow[]
+  today: string
+  top3Count: number
+}) {
   if (tasks.length === 0) return null
   return (
     <section className="mb-6">
@@ -83,6 +106,8 @@ function TaskGroup({ label, tasks }: { label: string; tasks: TaskRow[] }) {
             domain={task.domain as 'work' | 'personal' | null}
             energy={task.energy as 'deep' | 'admin' | null}
             dueDate={task.due_date}
+            isTop3Today={task.is_top3 && task.top3_date === today}
+            top3Count={top3Count}
           />
         ))}
       </div>

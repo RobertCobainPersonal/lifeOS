@@ -39,4 +39,5 @@ export interface Settings {
   id: number
   slipping_days: number
   clickup_token_set: boolean
+  last_planned_date: string | null
 }
