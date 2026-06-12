@@ -20,14 +20,21 @@ export async function addToTop3(taskId: string) {
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
 
-  const { count } = await supabase
-    .from('tasks')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_top3', true)
-    .eq('top3_date', today)
-    .eq('status', 'open')
+  const [localResult, clickupResult] = await Promise.all([
+    supabase
+      .from('tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_top3', true)
+      .eq('top3_date', today)
+      .eq('status', 'open'),
+    supabase
+      .from('clickup_tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('pinned_top3_date', today),
+  ])
+  const totalTop3 = (localResult.count ?? 0) + (clickupResult.count ?? 0)
 
-  if ((count ?? 0) >= 3) {
+  if (totalTop3 >= 3) {
     throw new Error('Top 3 is full — remove one first')
   }
 
