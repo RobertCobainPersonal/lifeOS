@@ -132,6 +132,7 @@ function TaskForm({
   const [domain, setDomain] = useState<'work' | 'personal' | ''>('')
   const [energy, setEnergy] = useState<'deep' | 'admin' | ''>('')
   const [dueDate, setDueDate] = useState('')
+  const [details, setDetails] = useState('')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
 
@@ -149,6 +150,7 @@ function TaskForm({
           domain: domain as 'work' | 'personal',
           energy: energy as 'deep' | 'admin',
           dueDate: dueDate || null,
+          details: details || null,
         })
         onSuccess()
       } catch {
@@ -216,6 +218,17 @@ function TaskForm({
           onChange={e => setDueDate(e.target.value)}
           className="w-full bg-gray-800 text-gray-300 px-3 py-2.5 rounded-lg text-sm focus:outline-none"
           style={{ colorScheme: 'dark' }}
+        />
+      </div>
+
+      <div>
+        <p className="text-xs text-gray-500 mb-1.5">Notes (optional)</p>
+        <textarea
+          value={details}
+          onChange={e => setDetails(e.target.value)}
+          rows={3}
+          className="w-full bg-gray-800 text-gray-300 px-3 py-2.5 rounded-lg text-sm focus:outline-none resize-none placeholder-gray-600"
+          placeholder="Context, links, acceptance criteria…"
         />
       </div>
 

@@ -9,6 +9,7 @@ type TaskRow = {
   domain: string | null
   energy: string | null
   due_date: string | null
+  details: string | null
   status: string
   is_top3: boolean
   top3_date: string | null
@@ -26,7 +27,7 @@ export default async function TasksPage() {
   const [tasksResult, countResult] = await Promise.all([
     supabase
       .from('tasks')
-      .select('id, title, domain, energy, due_date, status, is_top3, top3_date')
+      .select('id, title, domain, energy, due_date, details, status, is_top3, top3_date')
       .eq('status', 'open')
       .order('due_date', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true }),
@@ -106,6 +107,7 @@ function TaskGroup({
             domain={task.domain as 'work' | 'personal' | null}
             energy={task.energy as 'deep' | 'admin' | null}
             dueDate={task.due_date}
+            details={task.details}
             isTop3Today={task.is_top3 && task.top3_date === today}
             top3Count={top3Count}
           />

@@ -9,6 +9,7 @@ interface TaskCardProps {
   domain: 'work' | 'personal' | null
   energy: 'deep' | 'admin' | null
   dueDate: string | null
+  details: string | null
   isTop3Today: boolean
   top3Count: number
 }
@@ -19,6 +20,7 @@ export default function TaskCard({
   domain,
   energy,
   dueDate,
+  details,
   isTop3Today,
   top3Count,
 }: TaskCardProps) {
@@ -30,6 +32,7 @@ export default function TaskCard({
   const [editDomain, setEditDomain] = useState(domain)
   const [editEnergy, setEditEnergy] = useState(energy)
   const [editDueDate, setEditDueDate] = useState(dueDate ?? '')
+  const [editDetails, setEditDetails] = useState(details ?? '')
   const [isPending, startTransition] = useTransition()
 
   function handleComplete() {
@@ -82,6 +85,7 @@ export default function TaskCard({
           domain: editDomain,
           energy: editEnergy,
           dueDate: editDueDate || null,
+          details: editDetails || null,
         })
         setEditing(false)
       } catch {
@@ -90,11 +94,19 @@ export default function TaskCard({
     })
   }
 
+  function cancelEdit() {
+    setEditTitle(title)
+    setEditDomain(domain)
+    setEditEnergy(energy)
+    setEditDueDate(dueDate ?? '')
+    setEditDetails(details ?? '')
+    setEditing(false)
+  }
+
   if (done) return null
 
   const today = new Date().toISOString().split('T')[0]
-  const displayDueDate = editing ? editDueDate : (dueDate ?? '')
-  const isOverdue = !editing && dueDate && dueDate < today
+  const isOverdue = dueDate && dueDate < today
 
   if (editing) {
     return (
@@ -109,6 +121,15 @@ export default function TaskCard({
             placeholder="Task title"
           />
 
+          {/* Details */}
+          <textarea
+            value={editDetails}
+            onChange={e => setEditDetails(e.target.value)}
+            rows={3}
+            className="w-full bg-gray-800 text-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none placeholder-gray-600"
+            placeholder="Notes, context, links…"
+          />
+
           {/* Domain toggle */}
           <div className="flex gap-2 items-center">
             <span className="text-gray-500 text-xs w-14 shrink-0">Domain</span>
@@ -118,9 +139,7 @@ export default function TaskCard({
                 type="button"
                 onClick={() => setEditDomain(editDomain === d ? null : d)}
                 className={`px-3 py-1 rounded-full text-xs transition-colors ${
-                  editDomain === d
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-800 text-gray-400'
+                  editDomain === d ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400'
                 }`}
               >
                 {d}
@@ -154,7 +173,7 @@ export default function TaskCard({
             <span className="text-gray-500 text-xs w-14 shrink-0">Due</span>
             <input
               type="date"
-              value={displayDueDate}
+              value={editDueDate}
               onChange={e => setEditDueDate(e.target.value)}
               className="bg-gray-800 text-gray-300 px-2 py-1 rounded-lg text-sm focus:outline-none"
               style={{ colorScheme: 'dark' }}
@@ -176,17 +195,11 @@ export default function TaskCard({
               disabled={!editTitle.trim() || isPending}
               className="px-4 py-2 bg-blue-600 active:bg-blue-700 text-white text-sm rounded-lg disabled:opacity-40 transition-colors"
             >
-              Save
+              {isPending ? 'Saving…' : 'Save'}
             </button>
             <button
               type="button"
-              onClick={() => {
-                setEditTitle(title)
-                setEditDomain(domain)
-                setEditEnergy(energy)
-                setEditDueDate(dueDate ?? '')
-                setEditing(false)
-              }}
+              onClick={cancelEdit}
               disabled={isPending}
               className="px-4 py-2 bg-gray-800 active:bg-gray-700 text-gray-400 text-sm rounded-lg"
             >
@@ -208,6 +221,9 @@ export default function TaskCard({
       />
       <div className="flex-1 min-w-0">
         <p className="text-white text-base leading-snug">{title}</p>
+        {details && (
+          <p className="text-gray-600 text-xs mt-0.5 truncate">{details}</p>
+        )}
         <div className="flex items-center gap-2 mt-1 flex-wrap">
           {energy && (
             <span
@@ -229,11 +245,11 @@ export default function TaskCard({
           {top3Error && <span className="text-red-400 text-xs">{top3Error}</span>}
         </div>
       </div>
-      <div className="flex items-center gap-1 shrink-0 mt-0.5">
+      <div className="flex items-center gap-2 shrink-0 mt-0.5">
         <button
           onClick={() => setEditing(true)}
           disabled={isPending}
-          className="text-gray-700 active:text-gray-400 text-sm px-1 disabled:opacity-40 transition-colors"
+          className="text-gray-500 active:text-gray-300 text-base px-1 disabled:opacity-40 transition-colors"
           aria-label={`Edit "${title}"`}
         >
           ✎

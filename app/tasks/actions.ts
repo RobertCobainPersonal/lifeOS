@@ -67,6 +67,7 @@ export async function updateTask(
     domain: 'work' | 'personal' | null
     energy: 'deep' | 'admin' | null
     dueDate: string | null
+    details: string | null
   }
 ) {
   const supabase = await createClient()
@@ -77,6 +78,7 @@ export async function updateTask(
       domain: fields.domain,
       energy: fields.energy,
       due_date: fields.dueDate || null,
+      details: fields.details || null,
     })
     .eq('id', taskId)
   if (error) throw new Error(error.message)

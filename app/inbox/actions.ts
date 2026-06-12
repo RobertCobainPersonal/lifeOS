@@ -26,6 +26,7 @@ export async function createTaskFromCapture(
     domain: 'work' | 'personal'
     energy: 'deep' | 'admin'
     dueDate: string | null
+    details: string | null
   }
 ) {
   const supabase = await createClient()
@@ -36,6 +37,7 @@ export async function createTaskFromCapture(
     domain: task.domain,
     energy: task.energy,
     due_date: task.dueDate || null,
+    details: task.details || null,
     status: 'open',
   })
   if (taskError) throw new Error(taskError.message)
