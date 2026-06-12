@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { completeTask, addToTop3, removeFromTop3 } from '@/app/tasks/actions'
+import { completeTask, addToTop3, removeFromTop3, updateTask } from '@/app/tasks/actions'
 
 interface TaskCardProps {
   id: string
@@ -16,6 +16,7 @@ interface TaskCardProps {
 export default function TaskCard({
   id,
   title,
+  domain,
   energy,
   dueDate,
   isTop3Today,
@@ -24,6 +25,11 @@ export default function TaskCard({
   const [done, setDone] = useState(false)
   const [top3, setTop3] = useState(isTop3Today)
   const [top3Error, setTop3Error] = useState('')
+  const [editing, setEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState(title)
+  const [editDomain, setEditDomain] = useState(domain)
+  const [editEnergy, setEditEnergy] = useState(energy)
+  const [editDueDate, setEditDueDate] = useState(dueDate ?? '')
   const [isPending, startTransition] = useTransition()
 
   function handleComplete() {
@@ -66,10 +72,131 @@ export default function TaskCard({
     }
   }
 
+  function handleSaveEdit(e: { preventDefault(): void }) {
+    e.preventDefault()
+    if (!editTitle.trim()) return
+    startTransition(async () => {
+      try {
+        await updateTask(id, {
+          title: editTitle.trim(),
+          domain: editDomain,
+          energy: editEnergy,
+          dueDate: editDueDate || null,
+        })
+        setEditing(false)
+      } catch {
+        // keep form open on error
+      }
+    })
+  }
+
   if (done) return null
 
   const today = new Date().toISOString().split('T')[0]
-  const isOverdue = dueDate && dueDate < today
+  const displayDueDate = editing ? editDueDate : (dueDate ?? '')
+  const isOverdue = !editing && dueDate && dueDate < today
+
+  if (editing) {
+    return (
+      <div className="py-3.5 border-b border-gray-800 last:border-0">
+        <form onSubmit={handleSaveEdit} className="space-y-3">
+          <input
+            type="text"
+            value={editTitle}
+            onChange={e => setEditTitle(e.target.value)}
+            autoFocus
+            className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg text-base focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Task title"
+          />
+
+          {/* Domain toggle */}
+          <div className="flex gap-2 items-center">
+            <span className="text-gray-500 text-xs w-14 shrink-0">Domain</span>
+            {(['work', 'personal'] as const).map(d => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setEditDomain(editDomain === d ? null : d)}
+                className={`px-3 py-1 rounded-full text-xs transition-colors ${
+                  editDomain === d
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-800 text-gray-400'
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+
+          {/* Energy toggle */}
+          <div className="flex gap-2 items-center">
+            <span className="text-gray-500 text-xs w-14 shrink-0">Energy</span>
+            {(['deep', 'admin'] as const).map(e => (
+              <button
+                key={e}
+                type="button"
+                onClick={() => setEditEnergy(editEnergy === e ? null : e)}
+                className={`px-3 py-1 rounded-full text-xs transition-colors ${
+                  editEnergy === e
+                    ? e === 'deep'
+                      ? 'bg-purple-700 text-purple-100'
+                      : 'bg-gray-600 text-white'
+                    : 'bg-gray-800 text-gray-400'
+                }`}
+              >
+                {e}
+              </button>
+            ))}
+          </div>
+
+          {/* Due date */}
+          <div className="flex gap-2 items-center">
+            <span className="text-gray-500 text-xs w-14 shrink-0">Due</span>
+            <input
+              type="date"
+              value={displayDueDate}
+              onChange={e => setEditDueDate(e.target.value)}
+              className="bg-gray-800 text-gray-300 px-2 py-1 rounded-lg text-sm focus:outline-none"
+              style={{ colorScheme: 'dark' }}
+            />
+            {editDueDate && (
+              <button
+                type="button"
+                onClick={() => setEditDueDate('')}
+                className="text-gray-600 text-xs"
+              >
+                clear
+              </button>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={!editTitle.trim() || isPending}
+              className="px-4 py-2 bg-blue-600 active:bg-blue-700 text-white text-sm rounded-lg disabled:opacity-40 transition-colors"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditTitle(title)
+                setEditDomain(domain)
+                setEditEnergy(energy)
+                setEditDueDate(dueDate ?? '')
+                setEditing(false)
+              }}
+              disabled={isPending}
+              className="px-4 py-2 bg-gray-800 active:bg-gray-700 text-gray-400 text-sm rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-start gap-3 py-3.5 border-b border-gray-800 last:border-0">
@@ -102,16 +229,26 @@ export default function TaskCard({
           {top3Error && <span className="text-red-400 text-xs">{top3Error}</span>}
         </div>
       </div>
-      <button
-        onClick={handleTop3}
-        disabled={isPending}
-        className={`text-xl shrink-0 disabled:opacity-40 transition-colors mt-0.5 ${
-          top3 ? 'text-yellow-400 active:text-gray-500' : 'text-gray-600 active:text-yellow-400'
-        }`}
-        aria-label={top3 ? `Remove "${title}" from Top 3` : `Add "${title}" to Top 3`}
-      >
-        {top3 ? '★' : '☆'}
-      </button>
+      <div className="flex items-center gap-1 shrink-0 mt-0.5">
+        <button
+          onClick={() => setEditing(true)}
+          disabled={isPending}
+          className="text-gray-700 active:text-gray-400 text-sm px-1 disabled:opacity-40 transition-colors"
+          aria-label={`Edit "${title}"`}
+        >
+          ✎
+        </button>
+        <button
+          onClick={handleTop3}
+          disabled={isPending}
+          className={`text-xl disabled:opacity-40 transition-colors ${
+            top3 ? 'text-yellow-400 active:text-gray-500' : 'text-gray-600 active:text-yellow-400'
+          }`}
+          aria-label={top3 ? `Remove "${title}" from Top 3` : `Add "${title}" to Top 3`}
+        >
+          {top3 ? '★' : '☆'}
+        </button>
+      </div>
     </div>
   )
 }

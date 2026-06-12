@@ -59,3 +59,28 @@ export async function removeFromTop3(taskId: string) {
   revalidatePath('/today')
   revalidatePath('/tasks')
 }
+
+export async function updateTask(
+  taskId: string,
+  fields: {
+    title: string
+    domain: 'work' | 'personal' | null
+    energy: 'deep' | 'admin' | null
+    dueDate: string | null
+  }
+) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('tasks')
+    .update({
+      title: fields.title,
+      domain: fields.domain,
+      energy: fields.energy,
+      due_date: fields.dueDate || null,
+    })
+    .eq('id', taskId)
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/tasks')
+  revalidatePath('/today')
+}

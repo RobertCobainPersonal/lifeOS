@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import ClickupRefreshButton from '@/components/ClickupRefreshButton'
+import ClickupListGroup from '@/components/ClickupListGroup'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,22 +90,14 @@ export default async function ClickupPage() {
               {tasks.length} open task{tasks.length !== 1 ? 's' : ''}
             </p>
 
-            {/* Group by list */}
+            {/* Group by list — collapsible */}
             {groupByList(tasks).map(({ listName, items }) => (
-              <section key={listName} className="mb-6">
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
-                  {listName}
-                </h2>
-                <div className="bg-gray-900 rounded-xl divide-y divide-gray-800">
-                  {items.map(task => (
-                    <ClickupTaskRow
-                      key={task.clickup_id}
-                      task={task}
-                      today={today}
-                    />
-                  ))}
-                </div>
-              </section>
+              <ClickupListGroup
+                key={listName}
+                listName={listName}
+                tasks={items}
+                today={today}
+              />
             ))}
           </>
         )}
@@ -126,49 +119,6 @@ type Task = {
   synced_at: string | null
 }
 
-function ClickupTaskRow({ task, today }: { task: Task; today: string }) {
-  const isOverdue = task.due_date && task.due_date < today
-  const isPinnedToday = task.pinned_top3_date === today
-
-  return (
-    <div className="px-4 py-3 flex items-start gap-3">
-      <div className="flex-1 min-w-0">
-        <a
-          href={task.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white text-sm leading-snug hover:underline"
-        >
-          {task.title}
-        </a>
-        <div className="flex items-center gap-2 mt-1 flex-wrap">
-          {task.status && (
-            <span className="text-xs bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded">
-              {task.status}
-            </span>
-          )}
-          {task.due_date && (
-            <span className={`text-xs ${isOverdue ? 'text-red-400' : 'text-gray-500'}`}>
-              {isOverdue ? 'overdue · ' : ''}{task.due_date}
-            </span>
-          )}
-          {isPinnedToday && (
-            <span className="text-yellow-400 text-xs">★ Top 3</span>
-          )}
-        </div>
-      </div>
-      <a
-        href={task.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-gray-600 active:text-gray-400 text-sm shrink-0 mt-0.5"
-        aria-label="Open in ClickUp"
-      >
-        ↗
-      </a>
-    </div>
-  )
-}
 
 function groupByList(tasks: Task[]) {
   const map = new Map<string, Task[]>()
