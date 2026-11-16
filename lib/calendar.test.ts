@@ -1,0 +1,208 @@
+import { describe, expect, it } from 'vitest'
+import {
+  freeGaps,
+  formatGap,
+  londonClock,
+  londonTimeIso,
+  meetingMinutes,
+  nextEvent,
+  parseCalendarPayload,
+  type CalendarEvent,
+} from './calendar'
+
+const ev = (start: string, end: string, over: Partial<CalendarEvent> = {}): CalendarEvent => ({
+  source: 'shortcut',
+  source_id: `${start}|x`,
+  day: start.slice(0, 10),
+  starts_at: start,
+  ends_at: end,
+  all_day: false,
+  title: 'Meeting',
+  location: null,
+  calendar: null,
+  ...over,
+})
+
+describe('parseCalendarPayload', () => {
+  const body = {
+    from: '2026-11-17',
+    events: [
+      { title: ' Team stand-up ', start: '2026-11-17T09:30:00Z', end: '2026-11-17T10:00:00Z', location: 'Room 2', calendar: 'Work' },
+    ],
+  }
+  it('parses events and defaults the range to one day', () => {
+    expect(parseCalendarPayload(body)).toEqual({
+      ok: true,
+      from: '2026-11-17',
+      to: '2026-11-17',
+      events: [
+        {
+          source: 'shortcut',
+          source_id: '2026-11-17T09:30:00.000Z|Team stand-up',
+          day: '2026-11-17',
+          starts_at: '2026-11-17T09:30:00.000Z',
+          ends_at: '2026-11-17T10:00:00.000Z',
+          all_day: false,
+          title: 'Team stand-up',
+          location: 'Room 2',
+          calendar: 'Work',
+        },
+      ],
+    })
+  })
+  it('accepts an empty day, which clears it', () => {
+    expect(parseCalendarPayload({ from: '2026-11-17', events: [] })).toMatchObject({ ok: true, events: [] })
+    expect(parseCalendarPayload({ from: '2026-11-17' })).toMatchObject({ ok: true, events: [] })
+  })
+  it('accepts a single event object as well as a list', () => {
+    const r = parseCalendarPayload({ from: '2026-11-17', events: body.events[0] })
+    expect(r.ok && r.events).toHaveLength(1)
+  })
+  it('requires a valid from date', () => {
+    expect(parseCalendarPayload({ events: [] }).ok).toBe(false)
+    expect(parseCalendarPayload({ from: '17/11/2026' }).ok).toBe(false)
+  })
+  it('rejects a range that runs backwards or is longer than 14 days', () => {
+    expect(parseCalendarPayload({ from: '2026-11-17', to: '2026-11-16' }).ok).toBe(false)
+    expect(parseCalendarPayload({ from: '2026-11-01', to: '2026-11-20' }).ok).toBe(false)
+    expect(parseCalendarPayload({ from: '2026-11-01', to: '2026-11-14' }).ok).toBe(true)
+  })
+  it('drops events with no title or no usable start, and keeps the rest', () => {
+    const r = parseCalendarPayload({
+      from: '2026-11-17',
+      events: [{ start: '2026-11-17T09:00:00Z' }, { title: 'No time' }, { title: 'Bad', start: 'soon' }, body.events[0]],
+    })
+    expect(r.ok && r.events.map(e => e.title)).toEqual(['Team stand-up'])
+  })
+  it('drops events that fall outside the stated range', () => {
+    const r = parseCalendarPayload({
+      from: '2026-11-17',
+      events: [{ title: 'Tomorrow', start: '2026-11-18T09:00:00Z', end: '2026-11-18T10:00:00Z' }],
+    })
+    expect(r.ok && r.events).toEqual([])
+  })
+  it('gives a missing or backwards end the start time', () => {
+    const r = parseCalendarPayload({
+      from: '2026-11-17',
+      events: [{ title: 'Call', start: '2026-11-17T09:00:00Z', end: '2026-11-17T08:00:00Z' }],
+    })
+    expect(r.ok && r.events[0].ends_at).toBe('2026-11-17T09:00:00.000Z')
+  })
+  it('reads all-day flags sent as true, "true", "Yes" or 1', () => {
+    for (const all_day of [true, 'true', 'Yes', 1]) {
+      const r = parseCalendarPayload({ from: '2026-11-17', events: [{ title: 'Leave', start: '2026-11-17T00:00:00Z', all_day }] })
+      expect(r.ok && r.events[0].all_day).toBe(true)
+    }
+  })
+  it('files a late summer event under its London day', () => {
+    const r = parseCalendarPayload({
+      from: '2026-07-02',
+      events: [{ title: 'Late call', start: '2026-07-01T23:30:00Z', end: '2026-07-02T00:00:00Z' }],
+    })
+    expect(r.ok && r.events[0].day).toBe('2026-07-02')
+  })
+  it('collapses the same event sent twice', () => {
+    const r = parseCalendarPayload({ from: '2026-11-17', events: [body.events[0], body.events[0]] })
+    expect(r.ok && r.events).toHaveLength(1)
+  })
+})
+
+describe('londonTimeIso', () => {
+  it('is the same clock time in winter', () => {
+    expect(londonTimeIso('2026-11-17', 8)).toBe('2026-11-17T08:00:00.000Z')
+  })
+  it('is an hour earlier in UTC during summer time', () => {
+    expect(londonTimeIso('2026-07-02', 8)).toBe('2026-07-02T07:00:00.000Z')
+  })
+  it('is right on the day the clocks go back', () => {
+    expect(londonTimeIso('2026-10-25', 8)).toBe('2026-10-25T08:00:00.000Z')
+  })
+})
+
+describe('londonClock', () => {
+  it('shows London time', () => {
+    expect(londonClock('2026-07-02T07:00:00Z')).toBe('08:00')
+    expect(londonClock('2026-11-17T14:05:00Z')).toBe('14:05')
+  })
+})
+
+describe('nextEvent', () => {
+  const events = [
+    ev('2026-11-17T09:00:00Z', '2026-11-17T09:30:00Z', { title: 'Stand-up' }),
+    ev('2026-11-17T11:00:00Z', '2026-11-17T12:00:00Z', { title: 'Review' }),
+    ev('2026-11-17T00:00:00Z', '2026-11-18T00:00:00Z', { title: 'Leave day', all_day: true }),
+  ]
+  it('is the meeting in progress while one is running', () => {
+    expect(nextEvent(events, new Date('2026-11-17T09:10:00Z'))?.title).toBe('Stand-up')
+  })
+  it('is the next one to start otherwise', () => {
+    expect(nextEvent(events, new Date('2026-11-17T09:45:00Z'))?.title).toBe('Review')
+  })
+  it('is null once the day is done, and never an all-day entry', () => {
+    expect(nextEvent(events, new Date('2026-11-17T13:00:00Z'))).toBeNull()
+  })
+})
+
+describe('freeGaps', () => {
+  const day = '2026-11-17'
+  const morning = new Date('2026-11-17T07:00:00Z')
+  it('is the whole working day when there are no meetings', () => {
+    expect(freeGaps([], day, morning)).toEqual([
+      { start: '2026-11-17T08:00:00.000Z', end: '2026-11-17T18:00:00.000Z', minutes: 600 },
+    ])
+  })
+  it('finds the gaps around meetings', () => {
+    const events = [ev('2026-11-17T09:00:00Z', '2026-11-17T10:00:00Z'), ev('2026-11-17T13:00:00Z', '2026-11-17T17:00:00Z')]
+    expect(freeGaps(events, day, morning).map(g => [londonClock(g.start), londonClock(g.end), g.minutes])).toEqual([
+      ['08:00', '09:00', 60],
+      ['10:00', '13:00', 180],
+      ['17:00', '18:00', 60],
+    ])
+  })
+  it('merges overlapping and back-to-back meetings', () => {
+    const events = [
+      ev('2026-11-17T09:00:00Z', '2026-11-17T10:00:00Z'),
+      ev('2026-11-17T09:30:00Z', '2026-11-17T11:00:00Z'),
+      ev('2026-11-17T11:00:00Z', '2026-11-17T12:00:00Z'),
+    ]
+    expect(freeGaps(events, day, morning).map(g => londonClock(g.start))).toEqual(['08:00', '12:00'])
+  })
+  it('leaves out gaps too short for a focus session', () => {
+    const events = [ev('2026-11-17T08:20:00Z', '2026-11-17T17:40:00Z')]
+    expect(freeGaps(events, day, morning)).toEqual([])
+  })
+  it('starts from now once the day is under way', () => {
+    const gaps = freeGaps([], day, new Date('2026-11-17T14:10:00Z'))
+    expect(gaps).toEqual([{ start: '2026-11-17T14:10:00.000Z', end: '2026-11-17T18:00:00.000Z', minutes: 230 }])
+  })
+  it('is empty after the working day', () => {
+    expect(freeGaps([], day, new Date('2026-11-17T19:00:00Z'))).toEqual([])
+  })
+  it('ignores all-day entries, which do not block time', () => {
+    const events = [ev('2026-11-17T00:00:00Z', '2026-11-18T00:00:00Z', { all_day: true })]
+    expect(freeGaps(events, day, morning)).toHaveLength(1)
+  })
+})
+
+describe('formatGap', () => {
+  it('reads as a time range with its length', () => {
+    expect(formatGap({ start: '2026-11-17T10:00:00.000Z', end: '2026-11-17T13:00:00.000Z', minutes: 180 })).toBe(
+      '10:00–13:00 (3h)'
+    )
+    expect(formatGap({ start: '2026-11-17T10:00:00.000Z', end: '2026-11-17T10:45:00.000Z', minutes: 45 })).toBe(
+      '10:00–10:45 (45m)'
+    )
+  })
+})
+
+describe('meetingMinutes', () => {
+  it('totals timed meetings on the given days and skips all-day entries', () => {
+    const events = [
+      ev('2026-11-17T09:00:00Z', '2026-11-17T10:00:00Z'),
+      ev('2026-11-18T09:00:00Z', '2026-11-18T09:30:00Z'),
+      ev('2026-11-17T00:00:00Z', '2026-11-18T00:00:00Z', { all_day: true }),
+      ev('2026-11-01T09:00:00Z', '2026-11-01T10:00:00Z'),
+    ]
+    expect(meetingMinutes(events, ['2026-11-17', '2026-11-18'])).toBe(90)
+  })
+})

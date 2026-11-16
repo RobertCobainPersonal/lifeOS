@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { confirmMorningPlan, dismissMorningPlan } from '@/app/today/actions'
+import { formatGap, londonClock, type CalendarEvent, type Gap } from '@/lib/calendar'
 
 interface PlanTask {
   id: string
@@ -23,6 +24,9 @@ interface MorningPlanProps {
   workTasks?: WorkTask[]
   /** Task chosen at last night's close-out; starts selected as the one thing. */
   preselectedTaskId?: string | null
+  /** Today's calendar, shown for context above the choices. */
+  meetings?: CalendarEvent[]
+  gaps?: Gap[]
 }
 
 const GROUPS: { key: PlanTask['category']; label: string }[] = [
@@ -34,7 +38,13 @@ const GROUPS: { key: PlanTask['category']; label: string }[] = [
   { key: 'slipping', label: 'Slipping' },
 ]
 
-export default function MorningPlan({ tasks, workTasks = [], preselectedTaskId = null }: MorningPlanProps) {
+export default function MorningPlan({
+  tasks,
+  workTasks = [],
+  preselectedTaskId = null,
+  meetings = [],
+  gaps = [],
+}: MorningPlanProps) {
   // Ordered: the first selected item is the one thing.
   const [selected, setSelected] = useState<string[]>(
     preselectedTaskId && tasks.some(t => t.id === preselectedTaskId) ? [`t:${preselectedTaskId}`] : []
@@ -86,6 +96,35 @@ export default function MorningPlan({ tasks, workTasks = [], preselectedTaskId =
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+        {meetings.length > 0 && (
+          <div>
+            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
+              Today&rsquo;s meetings
+            </h2>
+            <div className="bg-card ring-1 ring-line rounded-xl px-4 py-1">
+              {meetings.map(m => (
+                <div
+                  key={m.source_id}
+                  className="flex gap-3 py-2.5 border-b border-line last:border-0 text-sm"
+                >
+                  <span className="shrink-0 w-24 text-muted tabular-nums">
+                    {m.all_day ? 'All day' : `${londonClock(m.starts_at)}–${londonClock(m.ends_at)}`}
+                  </span>
+                  <span className="flex-1 text-ink leading-snug">
+                    {m.title}
+                    {m.location ? <span className="text-muted"> · {m.location}</span> : null}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {gaps.length > 0 && (
+              <p className="text-muted text-sm mt-2">
+                Free {gaps.slice(0, 3).map(formatGap).join(' · ')}
+              </p>
+            )}
+          </div>
+        )}
+
         <p className="text-muted text-sm">
           Tap your one thing first, then up to two more.
           {full && <span className="text-accent-ink"> Top 3 full.</span>}
