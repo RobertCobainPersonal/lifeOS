@@ -1,11 +1,12 @@
 'use server'
 
+import { londonToday } from '@/lib/dates'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export async function doTodaySlipping(taskId: string) {
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
   const { error } = await supabase
     .from('tasks')
     .update({ due_date: today })

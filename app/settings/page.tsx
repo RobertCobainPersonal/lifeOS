@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SettingsForm from '@/components/SettingsForm'
+import JournalPromptsForm from '@/components/JournalPromptsForm'
+import TargetsForm from '@/components/TargetsForm'
+import { DEFAULT_PROMPTS } from '@/lib/closeout'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -12,7 +15,7 @@ export default async function SettingsPage() {
 
   const { data: settings } = await supabase
     .from('settings')
-    .select('slipping_days, clickup_token_set')
+    .select('slipping_days, clickup_token_set, journal_prompts, default_kcal, default_protein')
     .eq('id', 1)
     .single()
 
@@ -38,6 +41,37 @@ export default async function SettingsPage() {
               Tasks appear in Slipping after this many days without any activity.
             </p>
             <SettingsForm currentDays={slippingDays} />
+          </div>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 px-1">
+            Daily targets
+          </h2>
+          <div className="bg-gray-900 rounded-xl px-4 py-4">
+            <p className="text-gray-400 text-sm mb-3">
+              Shown on Home and Fuel. Changing them updates today as well.
+            </p>
+            <TargetsForm
+              kcal={settings?.default_kcal ?? 2400}
+              protein={settings?.default_protein ?? 160}
+            />
+          </div>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 px-1">
+            Journal prompts
+          </h2>
+          <div className="bg-gray-900 rounded-xl px-4 py-4">
+            <p className="text-gray-400 text-sm mb-3">
+              Asked when you close the day. One to three, all optional to answer.
+            </p>
+            <JournalPromptsForm
+              current={
+                Array.isArray(settings?.journal_prompts) ? settings.journal_prompts : DEFAULT_PROMPTS
+              }
+            />
           </div>
         </section>
 

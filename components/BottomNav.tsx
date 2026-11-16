@@ -1,20 +1,16 @@
 import Link from 'next/link'
 
 interface BottomNavProps {
-  current: 'today' | 'inbox' | 'tasks'
+  current: 'today' | 'inbox' | 'fuel' | 'more'
   inboxCount: number
 }
 
 export default function BottomNav({ current, inboxCount }: BottomNavProps) {
-  const items = [
-    { href: '/today', label: 'Today', key: 'today' as const },
-    {
-      href: '/inbox',
-      label: 'Inbox',
-      key: 'inbox' as const,
-      badge: inboxCount > 0 ? inboxCount : null,
-    },
-    { href: '/tasks', label: 'Tasks', key: 'tasks' as const },
+  const items: { href: string; label: string; key: BottomNavProps['current']; badge?: number | null }[] = [
+    { href: '/today', label: 'Today', key: 'today' },
+    { href: '/inbox', label: 'Inbox', key: 'inbox', badge: inboxCount > 0 ? inboxCount : null },
+    { href: '/fuel', label: 'Fuel', key: 'fuel' },
+    { href: '/more', label: 'More', key: 'more' },
   ]
 
   return (
@@ -29,6 +25,7 @@ export default function BottomNav({ current, inboxCount }: BottomNavProps) {
             <Link
               key={key}
               href={href}
+              aria-current={active ? 'page' : undefined}
               className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-medium transition-colors ${
                 active ? 'text-white' : 'text-gray-500 active:text-gray-300'
               }`}

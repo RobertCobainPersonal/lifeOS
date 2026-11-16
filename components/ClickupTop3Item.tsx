@@ -1,6 +1,8 @@
 'use client'
 
+import { londonToday } from '@/lib/dates'
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { unpinClickUpFromTop3 } from '@/app/clickup/actions'
 
 interface ClickupTop3ItemProps {
@@ -10,6 +12,8 @@ interface ClickupTop3ItemProps {
   dueDate: string | null
   url: string
   listName: string | null
+  /** Opens the focus form for this item; omitted while a session is running. */
+  focusHref?: string | null
 }
 
 export default function ClickupTop3Item({
@@ -19,6 +23,7 @@ export default function ClickupTop3Item({
   dueDate,
   url,
   listName,
+  focusHref,
 }: ClickupTop3ItemProps) {
   const [removed, setRemoved] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -36,7 +41,7 @@ export default function ClickupTop3Item({
 
   if (removed) return null
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
   const isOverdue = dueDate && dueDate < today
 
   return (
@@ -70,6 +75,15 @@ export default function ClickupTop3Item({
           )}
         </div>
       </div>
+      {focusHref && (
+        <Link
+          href={focusHref}
+          className="shrink-0 px-2.5 py-1 text-xs font-medium text-blue-300 bg-blue-600/15 active:bg-blue-600/30 rounded-lg"
+          aria-label={`Start focus on "${title}"`}
+        >
+          Focus
+        </Link>
+      )}
       <button
         onClick={handleUnpin}
         disabled={isPending}

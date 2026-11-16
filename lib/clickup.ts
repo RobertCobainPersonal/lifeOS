@@ -1,3 +1,4 @@
+import { londonDate } from '@/lib/dates'
 import 'server-only'
 
 const BASE = 'https://api.clickup.com/api/v2'
@@ -60,7 +61,7 @@ export async function fetchClickUpTasks(): Promise<RawClickupTask[]> {
           clickup_id: t.id,
           title: t.name ?? '',
           status: t.status?.status ?? null,
-          due_date: t.due_date ? new Date(parseInt(t.due_date)).toISOString().split('T')[0] : null,
+          due_date: t.due_date ? londonDate(new Date(parseInt(t.due_date))) : null,
           url: t.url ?? `https://app.clickup.com/t/${t.id}`,
           list_name: t.list?.name ?? null,
           synced_at: now,

@@ -1,5 +1,6 @@
 'use client'
 
+import { londonToday } from '@/lib/dates'
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { completeTask, addToTop3, removeFromTop3, updateTask } from '@/app/tasks/actions'
@@ -106,7 +107,7 @@ export default function TaskCard({
 
   if (done) return null
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
   const isOverdue = dueDate && dueDate < today
 
   if (editing) {
