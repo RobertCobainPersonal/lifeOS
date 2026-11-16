@@ -29,6 +29,7 @@ export default async function MorePage() {
     { href: '/clickup', label: 'Work (ClickUp)' },
     { href: '/slipping', label: 'Slipping', note: slippingCount > 0 ? String(slippingCount) : undefined },
     { href: '/time', label: 'Track time' },
+    { href: '/record', label: 'Record' },
     { href: '/settings', label: 'Settings' },
   ]
 
