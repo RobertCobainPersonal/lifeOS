@@ -15,6 +15,7 @@ export async function completeTask(taskId: string) {
 
   revalidatePath('/tasks')
   revalidatePath('/today')
+  revalidatePath('/projects', 'layout')
 }
 
 export async function addToTop3(taskId: string) {
@@ -47,6 +48,7 @@ export async function addToTop3(taskId: string) {
 
   revalidatePath('/today')
   revalidatePath('/tasks')
+  revalidatePath('/projects', 'layout')
 }
 
 export async function removeFromTop3(taskId: string) {
@@ -59,6 +61,7 @@ export async function removeFromTop3(taskId: string) {
 
   revalidatePath('/today')
   revalidatePath('/tasks')
+  revalidatePath('/projects', 'layout')
 }
 
 export async function updateTask(

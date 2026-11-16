@@ -24,6 +24,7 @@ export default async function SlippingPage() {
     .from('tasks')
     .select('id, title, energy, domain, due_date, last_touched_at')
     .eq('status', 'open')
+    .is('project_id', null)
     .lt('last_touched_at', thresholdDate.toISOString())
     .order('last_touched_at', { ascending: true })
 

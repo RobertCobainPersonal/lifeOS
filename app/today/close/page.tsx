@@ -33,7 +33,7 @@ export default async function ClosePage() {
     supabase.from('time_entries').select(ENTRY_COLUMNS).eq('day', today),
     supabase
       .from('tasks')
-      .select('id, title, is_top3, top3_date')
+      .select('id, title, is_top3, top3_date, project_id, band')
       .eq('status', 'open')
       .order('created_at'),
     supabase
@@ -98,7 +98,10 @@ export default async function ClosePage() {
         <CloseoutForm
           prompts={prompts}
           savedAnswers={dayLog.closeout?.answers ?? []}
-          tomorrowOptions={tasks.map(t => ({ id: t.id, title: t.title }))}
+          tomorrowOptions={tasks
+            // loose tasks, plus project tasks that are in Now
+            .filter(t => t.project_id === null || t.band === 'now')
+            .map(t => ({ id: t.id, title: t.title }))}
           savedTomorrowId={tomorrowLog.data?.one_thing_task_id ?? null}
         />
       </div>

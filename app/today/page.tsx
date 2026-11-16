@@ -6,6 +6,7 @@ import { getOrCreateDayLog } from '@/lib/daylog'
 import { resolveOneThing } from '@/lib/onething'
 import { getOpenEntry } from '@/lib/time-store'
 import { focusHref } from '@/lib/time'
+import { isLoose, planCandidates, type ProjectTask } from '@/lib/projects'
 import NowRow from '@/components/NowRow'
 import FuelLine from '@/components/FuelLine'
 import { dayTotals } from '@/lib/fuel'
@@ -49,11 +50,12 @@ export default async function TodayPage() {
     clickupDueTodayResult,
     foodResult,
     activityResult,
+    projectsResult,
   ] = await Promise.all([
     supabase
       .from('tasks')
       .select(
-        'id, title, energy, domain, due_date, status, is_top3, top3_date, deferred_by_reset, last_touched_at'
+        'id, title, energy, domain, due_date, status, is_top3, top3_date, deferred_by_reset, last_touched_at, project_id, band, project_sort, completed_at, created_at'
       )
       .eq('status', 'open'),
 
@@ -92,6 +94,8 @@ export default async function TodayPage() {
       .lte('day', today)
       .order('started_at', { ascending: false })
       .limit(1),
+
+    supabase.from('projects').select('id, name, is_focus, archived'),
   ])
 
   const allOpen = allOpenResult.data ?? []
@@ -124,8 +128,13 @@ export default async function TodayPage() {
   // Focus can start from the one thing or any Top 3 item, unless a session is already running
   const canFocus = openEntry?.mode !== 'focus'
 
+  // Project tasks stay on their project page: only loose tasks feed the lists below
+  const loose = allOpen.filter(isLoose)
+  const projectPicks = planCandidates(projectsResult.data ?? [], allOpen as ProjectTask[])
+  const projectPickName = new Map(projectPicks.map(c => [c.task.id, c.projectName]))
+
   // Admin batch: open admin tasks, due today or undated, not in today's top3
-  const adminBatch = allOpen
+  const adminBatch = loose
     .filter(
       t =>
         t.energy === 'admin' &&
@@ -137,10 +146,18 @@ export default async function TodayPage() {
 
   // Morning plan: show on first open of the day
   const showMorningPlan = settings?.last_planned_date !== today
-  type PlanCategory = 'tomorrow_pick' | 'yesterday' | 'deferred' | 'due_today' | 'slipping'
+  type PlanCategory =
+    | 'tomorrow_pick'
+    | 'yesterday'
+    | 'deferred'
+    | 'due_today'
+    | 'slipping'
+    | 'project'
   const categoryOf = (t: (typeof allOpen)[number]): PlanCategory | null => {
     if (t.id === dayLog.one_thing_task_id) return 'tomorrow_pick'
     if (yesterdayTop3Ids.has(t.id)) return 'yesterday'
+    // A project offers one next action; the rest of its list never appears here
+    if (!isLoose(t)) return projectPickName.has(t.id) ? 'project' : null
     if (t.deferred_by_reset) return 'deferred'
     if (t.due_date === today) return 'due_today'
     if (t.last_touched_at < slippingThreshold) return 'slipping'
@@ -150,7 +167,16 @@ export default async function TodayPage() {
     ? allOpen.flatMap(t => {
         const category = categoryOf(t)
         return category
-          ? [{ id: t.id, title: t.title, energy: t.energy, domain: t.domain, category }]
+          ? [
+              {
+                id: t.id,
+                title: t.title,
+                energy: t.energy,
+                domain: t.domain,
+                category,
+                projectName: projectPickName.get(t.id) ?? null,
+              },
+            ]
           : []
       })
     : []
@@ -162,7 +188,7 @@ export default async function TodayPage() {
     energy: t.energy,
     category: 'top3' as const,
   }))
-  const resetDueToday = allOpen
+  const resetDueToday = loose
     .filter(t => t.due_date === today && !top3Ids.has(t.id) && !adminBatchIds.has(t.id))
     .map(t => ({ id: t.id, title: t.title, energy: t.energy, category: 'due_today' as const }))
 

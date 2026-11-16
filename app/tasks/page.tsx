@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import TaskCard from '@/components/TaskCard'
 import BottomNav from '@/components/BottomNav'
+import Link from 'next/link'
 
 type TaskRow = {
   id: string
@@ -25,17 +26,24 @@ export default async function TasksPage() {
 
   const today = londonToday()
 
-  const [tasksResult, countResult] = await Promise.all([
+  const [tasksResult, countResult, projectCount] = await Promise.all([
+    // Project tasks live on their project page, not here
     supabase
       .from('tasks')
       .select('id, title, domain, energy, due_date, details, status, is_top3, top3_date')
       .eq('status', 'open')
+      .is('project_id', null)
       .order('due_date', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true }),
     supabase
       .from('captures')
       .select('*', { count: 'exact', head: true })
       .is('triaged_at', null),
+    supabase
+      .from('tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'open')
+      .not('project_id', 'is', null),
   ])
 
   if (tasksResult.error) throw tasksResult.error
@@ -74,6 +82,18 @@ export default async function TasksPage() {
             <TaskGroup label="Personal" tasks={personal} today={today} top3Count={top3Count} />
             <TaskGroup label="Other" tasks={other} today={today} top3Count={top3Count} />
           </>
+        )}
+
+        {(projectCount.count ?? 0) > 0 && (
+          <Link
+            href="/projects"
+            className="flex items-center justify-between bg-gray-900 rounded-xl px-4 py-4 active:bg-gray-800"
+          >
+            <span className="text-gray-300 text-sm">
+              {projectCount.count} more in Projects
+            </span>
+            <span className="text-gray-600 text-sm">→</span>
+          </Link>
         )}
       </div>
 

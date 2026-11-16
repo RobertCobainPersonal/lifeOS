@@ -20,12 +20,14 @@ export default async function MorePage() {
       .from('tasks')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'open')
+      .is('project_id', null)
       .lt('last_touched_at', threshold.toISOString()),
   ])
   const slippingCount = slipping.count ?? 0
 
   const links: { href: string; label: string; note?: string }[] = [
     { href: '/tasks', label: 'Tasks' },
+    { href: '/projects', label: 'Projects' },
     { href: '/clickup', label: 'Work (ClickUp)' },
     { href: '/slipping', label: 'Slipping', note: slippingCount > 0 ? String(slippingCount) : undefined },
     { href: '/time', label: 'Track time' },
