@@ -21,17 +21,17 @@ export default async function InboxPage() {
   const inboxCount = captures?.length ?? 0
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24">
         <h1 className="text-2xl font-bold mb-1">Inbox</h1>
-        <p className="text-gray-500 text-sm mb-6">
+        <p className="text-muted text-sm mb-6">
           {inboxCount === 0 ? 'All clear' : `${inboxCount} to triage`}
         </p>
 
         {inboxCount === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-600 text-base">Nothing to triage.</p>
-            <p className="text-gray-700 text-sm mt-1">
+            <p className="text-faint text-base">Nothing to triage.</p>
+            <p className="text-faint text-sm mt-1">
               New captures appear here after you add them.
             </p>
           </div>

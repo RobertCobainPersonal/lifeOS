@@ -38,7 +38,7 @@ export default function FoodEntryForm() {
   }
 
   const field =
-    'bg-gray-900 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-blue-600'
+    'bg-card ring-1 ring-line rounded-xl px-4 py-3 text-ink placeholder-faint text-base focus:outline-none focus:ring-1 focus:ring-accent'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-2" noValidate>
@@ -79,17 +79,17 @@ export default function FoodEntryForm() {
           onChange={e => setSaveAsMeal(e.target.checked)}
           className="w-5 h-5"
         />
-        <span className="text-gray-300 text-sm">Save as a meal for one-tap logging</span>
+        <span className="text-ink-soft text-sm">Save as a meal for one-tap logging</span>
       </label>
       {error && (
-        <p role="alert" className="text-red-400 text-sm">
+        <p role="alert" className="text-red-700 text-sm">
           {error}
         </p>
       )}
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-3.5 bg-blue-600 active:bg-blue-700 text-white font-semibold rounded-xl disabled:opacity-40"
+        className="w-full py-3.5 bg-accent active:bg-accent-strong text-white font-semibold rounded-xl disabled:opacity-40"
       >
         {isPending ? 'Saving…' : 'Log it'}
       </button>

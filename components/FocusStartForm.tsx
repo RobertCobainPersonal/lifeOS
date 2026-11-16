@@ -37,21 +37,21 @@ export default function FocusStartForm({ label, taskId, clickupId }: FocusStartF
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Focus on</p>
-        <p className="text-white text-lg font-semibold leading-snug">{label}</p>
+        <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">Focus on</p>
+        <p className="text-ink text-lg font-semibold leading-snug">{label}</p>
       </div>
 
       <EnergyPicker value={energy} onChange={setEnergy} />
 
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Length</p>
+        <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">Length</p>
         <div className="grid grid-cols-3 gap-2">
           {LENGTHS.map(minutes => (
             <button
               key={minutes}
               onClick={() => start(minutes)}
               disabled={isPending}
-              className="py-4 bg-blue-600 active:bg-blue-700 text-white font-semibold rounded-xl disabled:opacity-40"
+              className="py-4 bg-accent active:bg-accent-strong text-white font-semibold rounded-xl disabled:opacity-40"
             >
               {minutes} min
             </button>
@@ -71,12 +71,12 @@ export default function FocusStartForm({ label, taskId, clickupId }: FocusStartF
             onChange={e => setCustom(e.target.value)}
             placeholder="Custom minutes"
             aria-label="Custom length in minutes"
-            className="flex-1 bg-gray-900 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-blue-600"
+            className="flex-1 bg-card ring-1 ring-line rounded-xl px-4 py-3 text-ink placeholder-faint text-base focus:outline-none focus:ring-1 focus:ring-accent"
           />
           <button
             type="submit"
             disabled={isPending || custom.trim() === ''}
-            className="px-4 bg-gray-800 active:bg-gray-700 text-white text-sm font-medium rounded-xl disabled:opacity-40"
+            className="px-4 bg-sunk active:bg-line-strong text-ink text-sm font-medium rounded-xl disabled:opacity-40"
           >
             Start
           </button>
@@ -84,7 +84,7 @@ export default function FocusStartForm({ label, taskId, clickupId }: FocusStartF
       </div>
 
       {error && (
-        <p role="alert" className="text-red-400 text-sm">
+        <p role="alert" className="text-red-700 text-sm">
           {error}
         </p>
       )}

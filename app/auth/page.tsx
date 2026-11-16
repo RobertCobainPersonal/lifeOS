@@ -64,9 +64,9 @@ function AuthForm() {
 
   if (sent) {
     return (
-      <form onSubmit={handleVerify} className="w-full max-w-sm px-6 text-white" noValidate>
+      <form onSubmit={handleVerify} className="w-full max-w-sm px-6 text-ink" noValidate>
         <h1 className="text-2xl font-bold mb-2">Check your email</h1>
-        <p className="text-gray-400 mb-6 text-sm">
+        <p className="text-muted mb-6 text-sm">
           We sent a sign-in code to {email}. Type it here.
         </p>
         <input
@@ -78,25 +78,25 @@ function AuthForm() {
           placeholder="Code"
           aria-label="Sign-in code"
           autoFocus
-          className="w-full px-4 py-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:outline-none mb-4 text-2xl tracking-widest text-center tabular-nums"
+          className="w-full px-4 py-3 rounded-xl bg-sunk text-ink border border-line-strong focus:border-accent focus:outline-none mb-4 text-2xl tracking-widest text-center tabular-nums"
         />
         {codeError && (
-          <p role="alert" className="text-red-400 text-sm mb-4">{codeError}</p>
+          <p role="alert" className="text-red-700 text-sm mb-4">{codeError}</p>
         )}
         <button
           type="submit"
           disabled={verifying}
-          className="w-full py-3 rounded-xl bg-blue-600 active:bg-blue-700 text-white font-semibold text-lg disabled:opacity-50 transition-colors"
+          className="w-full py-3 rounded-xl bg-accent active:bg-accent-strong text-white font-semibold text-lg disabled:opacity-50 transition-colors"
         >
           {verifying ? 'Signing in…' : 'Sign in'}
         </button>
-        <p className="text-gray-600 text-xs mt-4">
+        <p className="text-faint text-xs mt-4">
           The link in the email also works if you open it in this same browser.
         </p>
         <button
           type="button"
           onClick={() => { setSent(false); setEmail(''); setCode(''); setCodeError('') }}
-          className="text-sm text-gray-500 underline mt-4"
+          className="text-sm text-muted underline mt-4"
         >
           Use a different email
         </button>
@@ -106,10 +106,10 @@ function AuthForm() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-sm px-6">
-      <h1 className="text-3xl font-bold text-white mb-2">LifeOS</h1>
-      <p className="text-gray-500 mb-8 text-sm">Your trusted life system</p>
+      <h1 className="text-3xl font-bold text-ink mb-2">LifeOS</h1>
+      <p className="text-muted mb-8 text-sm">Your trusted life system</p>
       {error && (
-        <p className="text-red-400 text-sm mb-4">{error}</p>
+        <p className="text-red-700 text-sm mb-4">{error}</p>
       )}
       <input
         type="email"
@@ -118,12 +118,12 @@ function AuthForm() {
         placeholder="your@email.com"
         required
         autoFocus
-        className="w-full px-4 py-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:outline-none mb-4 text-lg"
+        className="w-full px-4 py-3 rounded-xl bg-sunk text-ink border border-line-strong focus:border-accent focus:outline-none mb-4 text-lg"
       />
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 rounded-xl bg-blue-600 active:bg-blue-700 text-white font-semibold text-lg disabled:opacity-50 transition-colors"
+        className="w-full py-3 rounded-xl bg-accent active:bg-accent-strong text-white font-semibold text-lg disabled:opacity-50 transition-colors"
       >
         {loading ? 'Sending…' : 'Email me a sign-in code'}
       </button>
@@ -137,7 +137,7 @@ function AuthForm() {
           setError('')
           setSent(true)
         }}
-        className="w-full mt-3 py-2 text-sm text-gray-500 active:text-gray-300"
+        className="w-full mt-3 py-2 text-sm text-muted active:text-ink-soft"
       >
         I already have a code
       </button>
@@ -147,7 +147,7 @@ function AuthForm() {
 
 export default function AuthPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950">
+    <div className="min-h-screen flex items-center justify-center bg-paper">
       <Suspense>
         <AuthForm />
       </Suspense>

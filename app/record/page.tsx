@@ -64,22 +64,22 @@ export default async function RecordPage() {
   const split = trainingSplit({ entries, activities, days: last28, now })
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24 space-y-6">
         <div className="flex items-center gap-3">
-          <Link href="/more" className="text-gray-500 active:text-gray-300 text-sm">
+          <Link href="/more" className="text-muted active:text-ink-soft text-sm">
             ← More
           </Link>
           <h1 className="text-2xl font-bold">Record</h1>
         </div>
 
         <section>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
             Last 7 days
           </h2>
-          <div className="bg-gray-900 rounded-xl px-4 py-4 space-y-2">
+          <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4 space-y-2">
             {sentences(current, previous).map(line => (
-              <p key={line} className="text-gray-200 text-sm leading-relaxed">
+              <p key={line} className="text-ink-soft text-sm leading-relaxed">
                 {line}
               </p>
             ))}
@@ -88,29 +88,29 @@ export default async function RecordPage() {
 
         {recent.length > 0 ? (
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
+            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
               Where time went · last 14 days
             </h2>
-            <div className="bg-gray-900/40 rounded-xl px-3 py-4">
+            <div className="bg-card/60 rounded-xl px-3 py-4">
               <Heatmap grid={grid} />
             </div>
             {spots.length > 0 && (
-              <p className="text-gray-400 text-sm mt-3 px-1">
+              <p className="text-muted text-sm mt-3 px-1">
                 Procrastinating most often lands around {listHours(spots)}.
               </p>
             )}
           </section>
         ) : (
-          <p className="text-gray-600 text-sm px-1">More here once there are a few days of entries.</p>
+          <p className="text-faint text-sm px-1">More here once there are a few days of entries.</p>
         )}
 
         {windows.length > 0 && (
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
+            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
               Usually free outside work
             </h2>
-            <div className="bg-gray-900 rounded-xl px-4 py-4">
-              <p className="text-gray-200 text-sm leading-relaxed">
+            <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4">
+              <p className="text-ink-soft text-sm leading-relaxed">
                 {listHours(windows.map(w => w.hour).sort((a, b) => a - b))} are usually untracked or rest.
               </p>
             </div>
@@ -119,15 +119,15 @@ export default async function RecordPage() {
 
         {split && (
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
+            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
               Training and focus · last 28 days
             </h2>
-            <div className="bg-gray-900 rounded-xl px-4 py-4">
-              <p className="text-gray-200 text-sm leading-relaxed">
+            <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4">
+              <p className="text-ink-soft text-sm leading-relaxed">
                 On days after training you averaged {formatMinutes(split.afterTraining)} of focus; on
                 days after rest, {formatMinutes(split.afterRest)}.
               </p>
-              <p className="text-gray-600 text-xs mt-2">
+              <p className="text-faint text-xs mt-2">
                 Based on days with at least one focus session. A pattern, not a cause.
               </p>
             </div>

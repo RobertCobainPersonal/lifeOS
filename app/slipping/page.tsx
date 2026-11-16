@@ -34,15 +34,15 @@ export default async function SlippingPage() {
   const slippingTasks = tasks ?? []
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24">
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-2xl font-bold">Slipping</h1>
-          <Link href="/settings" className="text-gray-500 text-sm active:text-gray-300">
+          <Link href="/settings" className="text-muted text-sm active:text-ink-soft">
             {slippingDays}d threshold
           </Link>
         </div>
-        <p className="text-gray-500 text-sm mb-6">
+        <p className="text-muted text-sm mb-6">
           {slippingTasks.length === 0
             ? 'Nothing slipping — well done.'
             : `${slippingTasks.length} task${slippingTasks.length !== 1 ? 's' : ''} untouched for ${slippingDays}+ days`}
@@ -50,8 +50,8 @@ export default async function SlippingPage() {
 
         {slippingTasks.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-600 text-base">All tasks have been touched recently.</p>
-            <p className="text-gray-700 text-sm mt-1">
+            <p className="text-faint text-base">All tasks have been touched recently.</p>
+            <p className="text-faint text-sm mt-1">
               Tasks appear here when untouched for {slippingDays} days.
             </p>
           </div>

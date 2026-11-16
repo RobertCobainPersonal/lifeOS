@@ -38,23 +38,23 @@ export default async function FuelPage() {
   const fmt = (n: number) => n.toLocaleString('en-GB')
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24 space-y-6">
         <h1 className="text-2xl font-bold">Fuel</h1>
 
-        <section className="bg-gray-900 rounded-xl px-4 py-4 grid grid-cols-2 gap-4">
+        <section className="bg-card ring-1 ring-line rounded-xl px-4 py-4 grid grid-cols-2 gap-4">
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Calories</p>
+            <p className="text-xs text-muted uppercase tracking-wide">Calories</p>
             <p className="text-2xl font-bold tabular-nums">{fmt(totals.kcal)}</p>
             {dayLog.kcal_target && (
-              <p className="text-gray-500 text-sm tabular-nums">of {fmt(dayLog.kcal_target)}</p>
+              <p className="text-muted text-sm tabular-nums">of {fmt(dayLog.kcal_target)}</p>
             )}
           </div>
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Protein</p>
+            <p className="text-xs text-muted uppercase tracking-wide">Protein</p>
             <p className="text-2xl font-bold tabular-nums">{totals.protein_g} g</p>
             {dayLog.protein_target && (
-              <p className="text-gray-500 text-sm tabular-nums">of {dayLog.protein_target} g</p>
+              <p className="text-muted text-sm tabular-nums">of {dayLog.protein_target} g</p>
             )}
           </div>
         </section>
@@ -62,7 +62,7 @@ export default async function FuelPage() {
         <SavedMealList meals={meals} />
 
         <section>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
             Log food
           </h2>
           <FoodEntryForm />
@@ -70,10 +70,10 @@ export default async function FuelPage() {
 
         {entries.length > 0 && (
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
+            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
               Today
             </h2>
-            <div className="bg-gray-900 rounded-xl px-4">
+            <div className="bg-card ring-1 ring-line rounded-xl px-4">
               {entries.map(e => (
                 <FoodEntryRow key={e.id} id={e.id} label={e.label} kcal={e.kcal} protein={e.protein_g} />
               ))}

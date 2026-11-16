@@ -31,7 +31,7 @@ export default function TargetsForm({ kcal, protein }: { kcal: number; protein: 
   }
 
   const field =
-    'w-24 bg-gray-800 text-white text-center px-2 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-600'
+    'w-24 bg-sunk text-ink text-center px-2 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-line-strong'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
@@ -47,7 +47,7 @@ export default function TargetsForm({ kcal, protein }: { kcal: number; protein: 
             }}
             className={field}
           />
-          <span className="text-gray-400 text-sm">kcal</span>
+          <span className="text-muted text-sm">kcal</span>
         </label>
         <label className="flex items-center gap-2">
           <input
@@ -60,19 +60,19 @@ export default function TargetsForm({ kcal, protein }: { kcal: number; protein: 
             }}
             className={field}
           />
-          <span className="text-gray-400 text-sm">g protein</span>
+          <span className="text-muted text-sm">g protein</span>
         </label>
       </div>
       <div className="flex items-center gap-3">
         <button
           type="submit"
           disabled={isPending}
-          className="px-4 py-2 bg-blue-600 active:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-40"
+          className="px-4 py-2 bg-accent active:bg-accent-strong text-white text-sm font-medium rounded-lg disabled:opacity-40"
         >
           {isPending ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
         </button>
         {error && (
-          <p role="alert" className="text-red-400 text-xs">
+          <p role="alert" className="text-red-700 text-xs">
             {error}
           </p>
         )}

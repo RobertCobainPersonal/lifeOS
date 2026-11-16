@@ -36,7 +36,7 @@ export default async function MorePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24">
         <h1 className="text-2xl font-bold mb-6">More</h1>
         <div className="flex flex-col gap-3">
@@ -44,10 +44,10 @@ export default async function MorePage() {
             <Link
               key={link.href}
               href={link.href}
-              className="flex items-center justify-between bg-gray-900 rounded-xl px-4 py-4 active:bg-gray-800 transition-colors"
+              className="flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-4 active:bg-sunk transition-colors"
             >
-              <span className="text-white font-medium">{link.label}</span>
-              <span className="text-gray-600 text-sm tabular-nums">{link.note ?? '→'}</span>
+              <span className="text-ink font-medium">{link.label}</span>
+              <span className="text-faint text-sm tabular-nums">{link.note ?? '→'}</span>
             </Link>
           ))}
         </div>

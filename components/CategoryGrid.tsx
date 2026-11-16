@@ -46,8 +46,8 @@ export default function CategoryGrid({ current = null }: CategoryGridProps) {
             aria-pressed={key === current}
             className={`min-h-[64px] px-2 py-3 rounded-xl text-sm font-medium leading-tight transition-colors disabled:opacity-60 ${
               key === current
-                ? 'bg-blue-600/20 border border-blue-600/50 text-blue-200'
-                : 'bg-gray-900 text-gray-200 active:bg-gray-800'
+                ? 'bg-accent-soft border border-accent/40 text-accent-ink'
+                : 'bg-card ring-1 ring-line text-ink-soft active:bg-sunk'
             }`}
           >
             {CATEGORIES[key].label}
@@ -62,13 +62,13 @@ export default function CategoryGrid({ current = null }: CategoryGridProps) {
         placeholder="What is it? (optional)"
         maxLength={120}
         autoComplete="off"
-        className="w-full bg-gray-900 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-blue-600"
+        className="w-full bg-card ring-1 ring-line rounded-xl px-4 py-3 text-ink placeholder-faint text-base focus:outline-none focus:ring-1 focus:ring-accent"
       />
 
       <EnergyPicker value={energy} onChange={setEnergy} />
 
       {error && (
-        <p role="alert" className="text-red-400 text-sm">
+        <p role="alert" className="text-red-700 text-sm">
           {error}
         </p>
       )}

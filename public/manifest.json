@@ -4,8 +4,8 @@
   "description": "Your trusted life system",
   "start_url": "/today",
   "display": "standalone",
-  "background_color": "#030712",
-  "theme_color": "#030712",
+  "background_color": "#faf7f2",
+  "theme_color": "#faf7f2",
   "orientation": "portrait-primary",
   "icons": [
     {

@@ -57,7 +57,7 @@ export default async function ClickupPage() {
     : null
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24">
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-2xl font-bold">Work (ClickUp)</h1>
@@ -65,29 +65,29 @@ export default async function ClickupPage() {
         </div>
 
         {lastSyncedText && (
-          <p className="text-gray-600 text-xs mb-1">{lastSyncedText}</p>
+          <p className="text-faint text-xs mb-1">{lastSyncedText}</p>
         )}
 
         {syncError && (
-          <p className="text-amber-500 text-xs mb-4">
+          <p className="text-amber-700 text-xs mb-4">
             Sync error — showing cached data. {syncError}
           </p>
         )}
 
         {!hasToken ? (
           <div className="text-center py-16">
-            <p className="text-gray-600 text-base">ClickUp not configured.</p>
-            <p className="text-gray-700 text-sm mt-1">
+            <p className="text-faint text-base">ClickUp not configured.</p>
+            <p className="text-faint text-sm mt-1">
               Set CLICKUP_API_TOKEN in your environment variables.
             </p>
           </div>
         ) : tasks.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-600 text-base">No open ClickUp tasks assigned to you.</p>
+            <p className="text-faint text-base">No open ClickUp tasks assigned to you.</p>
           </div>
         ) : (
           <>
-            <p className="text-gray-500 text-sm mb-6">
+            <p className="text-muted text-sm mb-6">
               {tasks.length} open task{tasks.length !== 1 ? 's' : ''}
             </p>
 

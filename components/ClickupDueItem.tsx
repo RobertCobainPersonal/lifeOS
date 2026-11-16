@@ -45,31 +45,31 @@ export default function ClickupDueItem({
   if (pinned) return null
 
   return (
-    <div className="flex items-center gap-3 py-3 border-b border-gray-800 last:border-0">
-      <div className="w-6 h-6 shrink-0 rounded-full border-2 border-gray-700 flex items-center justify-center">
-        <span className="text-gray-600 text-[9px]">CU</span>
+    <div className="flex items-center gap-3 py-3 border-b border-line last:border-0">
+      <div className="w-6 h-6 shrink-0 rounded-full border-2 border-line-strong flex items-center justify-center">
+        <span className="text-faint text-[9px]">CU</span>
       </div>
       <div className="flex-1 min-w-0">
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-white text-sm leading-snug hover:underline"
+          className="text-ink text-sm leading-snug hover:underline"
         >
           {title}
         </a>
-        {listName && <p className="text-gray-600 text-xs mt-0.5">{listName}</p>}
-        {pinError && <p className="text-red-400 text-xs mt-0.5">{pinError}</p>}
+        {listName && <p className="text-faint text-xs mt-0.5">{listName}</p>}
+        {pinError && <p className="text-red-700 text-xs mt-0.5">{pinError}</p>}
       </div>
       {status && (
-        <span className="text-xs px-1.5 py-0.5 rounded bg-gray-800 text-gray-500 shrink-0">
+        <span className="text-xs px-1.5 py-0.5 rounded bg-sunk text-muted shrink-0">
           {status}
         </span>
       )}
       <button
         onClick={handlePin}
         disabled={isPending}
-        className="text-gray-600 active:text-yellow-400 text-lg shrink-0 disabled:opacity-40 transition-colors"
+        className="text-faint active:text-amber-600 text-lg shrink-0 disabled:opacity-40 transition-colors"
         aria-label={`Add "${title}" to Top 3`}
       >
         ☆

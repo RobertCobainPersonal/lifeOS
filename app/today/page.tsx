@@ -200,7 +200,7 @@ export default async function TodayPage() {
   }).format(now)
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       {showMorningPlan && (
         <MorningPlan
           tasks={morningPlanTasks}
@@ -213,14 +213,14 @@ export default async function TodayPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Today</h1>
-            <p className="text-gray-500 text-sm">
+            <p className="text-muted text-sm">
               {dateLabel}
               {latestActivity ? ` · ${describeActivity(latestActivity, today)}` : ''}
             </p>
           </div>
           <Link
             href="/settings"
-            className="text-gray-600 active:text-gray-400 text-xl"
+            className="text-faint active:text-muted text-xl"
             aria-label="Settings"
           >
             ⚙
@@ -239,11 +239,11 @@ export default async function TodayPage() {
 
         <section className="mb-6">
           <div className="flex items-baseline justify-between mb-2 px-1">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Top 3</h2>
-            {restCount > 0 && <span className="text-xs text-gray-600">{restCount} left</span>}
+            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide">Top 3</h2>
+            {restCount > 0 && <span className="text-xs text-faint">{restCount} left</span>}
           </div>
           {restCount === 0 ? (
-            <p className="text-gray-600 text-sm px-1">
+            <p className="text-faint text-sm px-1">
               {oneThingOptions.length === 0
                 ? 'Nothing pinned. Star tasks from More → Tasks.'
                 : 'Nothing else pinned.'}
@@ -292,7 +292,7 @@ export default async function TodayPage() {
         {dayLog.closed_at ? (
           <Link
             href="/today/close"
-            className="mb-4 block text-center text-gray-500 text-sm py-3 active:text-gray-300"
+            className="mb-4 block text-center text-muted text-sm py-3 active:text-ink-soft"
           >
             Day closed ✓
           </Link>
@@ -300,7 +300,7 @@ export default async function TodayPage() {
           londonHour(now) >= 16 && (
             <Link
               href="/today/close"
-              className="mb-4 block text-center bg-gray-900 active:bg-gray-800 rounded-xl py-3.5 text-white font-medium"
+              className="mb-4 block text-center bg-card ring-1 ring-line active:bg-sunk rounded-xl py-3.5 text-ink font-medium"
             >
               Close the day
             </Link>

@@ -35,7 +35,7 @@ export default function ClickupTaskList({ groups, today }: ClickupTaskListProps)
       <div className="flex justify-end mb-3">
         <button
           onClick={toggleAll}
-          className="text-xs text-gray-600 active:text-gray-400 transition-colors"
+          className="text-xs text-faint active:text-muted transition-colors"
         >
           {allCollapsed ? 'Expand all' : 'Collapse all'}
         </button>

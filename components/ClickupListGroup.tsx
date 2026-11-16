@@ -28,17 +28,17 @@ export default function ClickupListGroup({
         onClick={onToggle}
         className="w-full flex items-center justify-between px-1 py-2 active:opacity-70 transition-opacity"
       >
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <span className="text-xs font-semibold text-muted uppercase tracking-wide">
           {listName}
         </span>
-        <span className="flex items-center gap-2 text-gray-600 text-xs">
+        <span className="flex items-center gap-2 text-faint text-xs">
           <span>{tasks.length}</span>
           <span>{expanded ? '↑' : '↓'}</span>
         </span>
       </button>
 
       {expanded && (
-        <div className="bg-gray-900 rounded-xl divide-y divide-gray-800">
+        <div className="bg-card ring-1 ring-line rounded-xl divide-y divide-line">
           {tasks.map(task => {
             const isOverdue = task.due_date && task.due_date < today
             const isPinnedToday = task.pinned_top3_date === today
@@ -50,23 +50,23 @@ export default function ClickupListGroup({
                     href={task.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white text-sm leading-snug hover:underline"
+                    className="text-ink text-sm leading-snug hover:underline"
                   >
                     {task.title}
                   </a>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     {task.status && (
-                      <span className="text-xs bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded">
+                      <span className="text-xs bg-sunk text-muted px-1.5 py-0.5 rounded">
                         {task.status}
                       </span>
                     )}
                     {task.due_date && (
-                      <span className={`text-xs ${isOverdue ? 'text-red-400' : 'text-gray-500'}`}>
+                      <span className={`text-xs ${isOverdue ? 'text-red-700' : 'text-muted'}`}>
                         {isOverdue ? 'overdue · ' : ''}{task.due_date}
                       </span>
                     )}
                     {isPinnedToday && (
-                      <span className="text-yellow-400 text-xs">★ Top 3</span>
+                      <span className="text-amber-600 text-xs">★ Top 3</span>
                     )}
                   </div>
                 </div>
@@ -74,7 +74,7 @@ export default function ClickupListGroup({
                   href={task.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 active:text-gray-400 text-sm shrink-0 mt-0.5"
+                  className="text-faint active:text-muted text-sm shrink-0 mt-0.5"
                   aria-label="Open in ClickUp"
                 >
                   ↗

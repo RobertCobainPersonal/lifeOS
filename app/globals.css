@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+/* Paper theme: warm off-white, white cards, ink text, teal accent. */
+@theme {
+  --color-paper: #faf7f2;
+  --color-card: #ffffff;
+  --color-sunk: #f1ece4;
+  --color-line: #e7e0d6;
+  --color-line-strong: #d0c7b9;
+  --color-ink: #1f2933;
+  --color-ink-soft: #3b4652;
+  --color-muted: #6b7280;
+  --color-faint: #7a818b;
+  --color-accent: #0f766e;
+  --color-accent-strong: #0b5a54;
+  --color-accent-soft: #ddf1ee;
+  --color-accent-ink: #0b5a54;
+}

@@ -18,7 +18,7 @@ const SHORT: Record<Category, string> = {
 }
 
 /** Five steps of one hue: more time, stronger fill. */
-const STEPS = ['bg-gray-900', 'bg-blue-500/20', 'bg-blue-500/40', 'bg-blue-500/65', 'bg-blue-400']
+const STEPS = ['bg-card ring-1 ring-line', 'bg-accent/15', 'bg-accent/35', 'bg-accent/60', 'bg-accent']
 
 /** Hour of day against category. Shade shows minutes; tap a cell for the figure. */
 export default function Heatmap({ grid }: { grid: HourRow[] }) {
@@ -42,11 +42,11 @@ export default function Heatmap({ grid }: { grid: HourRow[] }) {
         <caption className="sr-only">Minutes by hour of day and category</caption>
         <thead>
           <tr>
-            <th scope="col" className="w-10 text-left font-normal text-gray-600">
+            <th scope="col" className="w-10 text-left font-normal text-faint">
               <span className="sr-only">Hour</span>
             </th>
             {categories.map(c => (
-              <th key={c} scope="col" className="font-normal text-gray-500 pb-1" title={CATEGORIES[c].label}>
+              <th key={c} scope="col" className="font-normal text-muted pb-1" title={CATEGORIES[c].label}>
                 <span aria-hidden="true">{SHORT[c]}</span>
                 <span className="sr-only">{CATEGORIES[c].label}</span>
               </th>
@@ -56,7 +56,7 @@ export default function Heatmap({ grid }: { grid: HourRow[] }) {
         <tbody>
           {rows.map(row => (
             <tr key={row.hour}>
-              <th scope="row" className="text-left font-normal text-gray-600 tabular-nums pr-1">
+              <th scope="row" className="text-left font-normal text-faint tabular-nums pr-1">
                 {formatHour(row.hour)}
               </th>
               {categories.map(c => {
@@ -70,7 +70,7 @@ export default function Heatmap({ grid }: { grid: HourRow[] }) {
                       onMouseEnter={() => setPicked({ hour: row.hour, category: c })}
                       title={`${CATEGORIES[c].label}, ${formatHour(row.hour)}: ${formatMinutes(minutes)}`}
                       className={`block w-full h-6 rounded-[3px] ${STEPS[step(minutes)]} ${
-                        isPicked ? 'ring-2 ring-white' : ''
+                        isPicked ? 'ring-2 ring-ink' : ''
                       }`}
                     >
                       <span className="sr-only">{formatMinutes(minutes)}</span>
@@ -83,13 +83,13 @@ export default function Heatmap({ grid }: { grid: HourRow[] }) {
         </tbody>
       </table>
 
-      <p className="text-sm text-gray-300 mt-3 min-h-[1.25rem]" aria-live="polite">
+      <p className="text-sm text-ink-soft mt-3 min-h-[1.25rem]" aria-live="polite">
         {picked
           ? `${CATEGORIES[picked.category].label} at ${formatHour(picked.hour)}: ${formatMinutes(pickedMinutes)}`
           : 'Tap a square for the figure.'}
       </p>
 
-      <div className="flex items-center gap-2 mt-2 text-xs text-gray-600">
+      <div className="flex items-center gap-2 mt-2 text-xs text-faint">
         <span>Less</span>
         {STEPS.map(s => (
           <span key={s} className={`w-4 h-3 rounded-[2px] ${s}`} />

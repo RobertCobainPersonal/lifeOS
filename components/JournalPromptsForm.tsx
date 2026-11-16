@@ -43,19 +43,19 @@ export default function JournalPromptsForm({ current }: { current: string[] }) {
           maxLength={120}
           placeholder={`Prompt ${i + 1}`}
           aria-label={`Journal prompt ${i + 1}`}
-          className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-600"
+          className="w-full bg-sunk text-ink px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-line-strong"
         />
       ))}
       <div className="flex items-center gap-3 pt-1">
         <button
           type="submit"
           disabled={isPending}
-          className="px-4 py-2 bg-blue-600 active:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-40"
+          className="px-4 py-2 bg-accent active:bg-accent-strong text-white text-sm font-medium rounded-lg disabled:opacity-40"
         >
           {isPending ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
         </button>
         {error && (
-          <p role="alert" className="text-red-400 text-xs">
+          <p role="alert" className="text-red-700 text-xs">
             {error}
           </p>
         )}

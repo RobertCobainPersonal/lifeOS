@@ -40,7 +40,7 @@ export default function QuickAdd({ inboxCount, aboveNav = false }: QuickAddProps
 
   return (
     <div
-      className={`fixed left-0 right-0 z-50 sm:static sm:mb-6 bg-gray-900 border-t border-gray-800 sm:border sm:rounded-xl px-4 py-3 ${
+      className={`fixed left-0 right-0 z-50 sm:static sm:mb-6 bg-card border-t border-line sm:border sm:rounded-xl px-4 py-3 ${
         aboveNav
           ? 'bottom-[calc(3.5rem+env(safe-area-inset-bottom))] sm:pb-3'
           : 'bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]'
@@ -54,23 +54,23 @@ export default function QuickAdd({ inboxCount, aboveNav = false }: QuickAddProps
           placeholder="Capture a thought…"
           autoComplete="off"
           disabled={isPending}
-          className="flex-1 bg-transparent text-white placeholder-gray-500 text-base focus:outline-none"
+          className="flex-1 bg-transparent text-ink placeholder-faint text-base focus:outline-none"
         />
         {inboxCount > 0 && (
-          <span className="text-xs text-gray-500 shrink-0 tabular-nums">
+          <span className="text-xs text-muted shrink-0 tabular-nums">
             {inboxCount} in inbox
           </span>
         )}
         <button
           type="submit"
           disabled={!value.trim() || isPending}
-          className="shrink-0 text-blue-500 disabled:text-gray-600 text-sm font-medium transition-colors"
+          className="shrink-0 text-accent-ink disabled:text-faint text-sm font-medium transition-colors"
           aria-label="Capture"
         >
           ↑
         </button>
       </form>
-      {error && <p role="alert" className="text-red-400 text-xs mt-1">{error}</p>}
+      {error && <p role="alert" className="text-red-700 text-xs mt-1">{error}</p>}
     </div>
   )
 }
