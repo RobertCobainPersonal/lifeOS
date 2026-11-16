@@ -46,7 +46,7 @@ export default function Heatmap({ grid }: { grid: HourRow[] }) {
               <span className="sr-only">Hour</span>
             </th>
             {categories.map(c => (
-              <th key={c} scope="col" className="font-normal text-muted pb-1" title={CATEGORIES[c].label}>
+              <th key={c} scope="col" className="font-normal text-muted pb-1 text-[10px]" title={CATEGORIES[c].label}>
                 <span aria-hidden="true">{SHORT[c]}</span>
                 <span className="sr-only">{CATEGORIES[c].label}</span>
               </th>
