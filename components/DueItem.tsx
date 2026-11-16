@@ -48,22 +48,22 @@ export default function DueItem({ id, title, energy, top3Count }: DueItemProps) 
   if (done || pinned) return null
 
   return (
-    <div className="flex items-center gap-3 py-3 border-b border-gray-800 last:border-0">
+    <div className="flex items-center gap-3 py-3 border-b border-line last:border-0">
       <button
         onClick={handleComplete}
         disabled={isPending}
-        className="w-6 h-6 shrink-0 rounded-full border-2 border-gray-600 active:border-green-500 active:bg-green-500/10 disabled:opacity-40 transition-colors"
+        className="w-6 h-6 shrink-0 rounded-full border-2 border-faint active:border-green-500 active:bg-green-500/10 disabled:opacity-40 transition-colors"
         aria-label={`Complete "${title}"`}
       />
       <div className="flex-1 min-w-0">
-        <p className="text-white text-sm leading-snug">{title}</p>
-        {pinError && <p className="text-red-400 text-xs mt-0.5">{pinError}</p>}
+        <p className="text-ink text-sm leading-snug">{title}</p>
+        {pinError && <p className="text-red-700 text-xs mt-0.5">{pinError}</p>}
       </div>
       {energy && (
         <span className={`text-xs px-1.5 py-0.5 rounded shrink-0 ${
           energy === 'deep'
-            ? 'bg-purple-900/60 text-purple-300'
-            : 'bg-gray-800 text-gray-400'
+            ? 'bg-purple-100 text-purple-800'
+            : 'bg-sunk text-muted'
         }`}>
           {energy}
         </span>
@@ -71,7 +71,7 @@ export default function DueItem({ id, title, energy, top3Count }: DueItemProps) 
       <button
         onClick={handlePin}
         disabled={isPending}
-        className="text-gray-600 active:text-yellow-400 text-lg shrink-0 disabled:opacity-40 transition-colors"
+        className="text-faint active:text-amber-600 text-lg shrink-0 disabled:opacity-40 transition-colors"
         aria-label={`Add "${title}" to Top 3`}
       >
         ☆

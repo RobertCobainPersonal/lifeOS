@@ -27,17 +27,17 @@ export default async function ProjectsPage() {
   const tasks = (tasksResult.data ?? []) as ProjectTask[]
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24">
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/more" className="text-gray-500 active:text-gray-300 text-sm">
+          <Link href="/more" className="text-muted active:text-ink-soft text-sm">
             ← More
           </Link>
           <h1 className="text-2xl font-bold">Projects</h1>
         </div>
 
         {projects.length === 0 ? (
-          <p className="text-gray-600 text-sm mb-6 px-1">No projects yet.</p>
+          <p className="text-faint text-sm mb-6 px-1">No projects yet.</p>
         ) : (
           <div className="flex flex-col gap-3 mb-6">
             {projects.map(project => {
@@ -48,20 +48,20 @@ export default async function ProjectsPage() {
                 <Link
                   key={project.id}
                   href={`/projects/${project.id}`}
-                  className="bg-gray-900 rounded-xl px-4 py-4 active:bg-gray-800"
+                  className="bg-card ring-1 ring-line rounded-xl px-4 py-4 active:bg-sunk"
                 >
                   <div className="flex items-baseline justify-between gap-3">
-                    <h2 className="text-white font-semibold">{project.name}</h2>
+                    <h2 className="text-ink font-semibold">{project.name}</h2>
                     {project.is_focus && (
-                      <span className="text-xs text-blue-300 bg-blue-600/15 rounded px-1.5 py-0.5">
+                      <span className="text-xs text-accent-ink bg-accent-soft rounded px-1.5 py-0.5">
                         Focus
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-300 text-sm mt-1 leading-snug">
+                  <p className="text-ink-soft text-sm mt-1 leading-snug">
                     {next ? `Next: ${next.title}` : 'Nothing in Now'}
                   </p>
-                  <p className="text-gray-600 text-xs mt-2">
+                  <p className="text-faint text-xs mt-2">
                     {counts.now} now · {counts.next} next · {counts.later} later ·{' '}
                     {touchedLabel(lastTouched(own), now)}
                   </p>

@@ -50,20 +50,20 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const doneCount = tasks.filter(t => t.status === 'done').length
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24">
-        <Link href="/projects" className="text-gray-500 active:text-gray-300 text-sm">
+        <Link href="/projects" className="text-muted active:text-ink-soft text-sm">
           ← Projects
         </Link>
         <div className="flex items-start justify-between gap-3 mt-2 mb-1">
           <h1 className="text-2xl font-bold">{project.name}</h1>
           <FocusProjectButton projectId={project.id} isFocus={project.is_focus} />
         </div>
-        <p className="text-gray-600 text-xs mb-1">
+        <p className="text-faint text-xs mb-1">
           {touchedLabel(lastTouched(tasks), now)}
           {doneCount > 0 ? ` · ${doneCount} done` : ''}
         </p>
-        {project.detail && <p className="text-gray-500 text-sm mb-6 break-words">{project.detail}</p>}
+        {project.detail && <p className="text-muted text-sm mb-6 break-words">{project.detail}</p>}
 
         <div className="space-y-6 mt-6">
           {BANDS.map(band => {
@@ -71,16 +71,16 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             return (
               <section key={band}>
                 <div className="flex items-baseline justify-between mb-1 px-1">
-                  <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <h2 className="text-xs font-semibold text-muted uppercase tracking-wide">
                     {BAND_LABEL[band]}
                   </h2>
-                  <span className="text-xs text-gray-600">{rows.length}</span>
+                  <span className="text-xs text-faint">{rows.length}</span>
                 </div>
-                <p className="text-gray-600 text-xs mb-2 px-1">{BAND_NOTE[band]}</p>
+                <p className="text-faint text-xs mb-2 px-1">{BAND_NOTE[band]}</p>
                 {rows.length === 0 ? (
-                  <p className="text-gray-700 text-sm px-1">Empty.</p>
+                  <p className="text-faint text-sm px-1">Empty.</p>
                 ) : (
-                  <div className="bg-gray-900 rounded-xl px-4">
+                  <div className="bg-card ring-1 ring-line rounded-xl px-4">
                     {rows.map(t => (
                       <ProjectTaskRow
                         key={t.id}

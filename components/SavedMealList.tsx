@@ -32,10 +32,10 @@ export default function SavedMealList({ meals }: { meals: SavedMeal[] }) {
   return (
     <section>
       <div className="flex items-baseline justify-between mb-2 px-1">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Saved meals</h2>
+        <h2 className="text-xs font-semibold text-muted uppercase tracking-wide">Saved meals</h2>
         <button
           onClick={() => setEditing(e => !e)}
-          className="text-xs text-gray-500 active:text-gray-300"
+          className="text-xs text-muted active:text-ink-soft"
         >
           {editing ? 'Done' : 'Edit'}
         </button>
@@ -48,12 +48,12 @@ export default function SavedMealList({ meals }: { meals: SavedMeal[] }) {
             disabled={isPending}
             className={`text-left px-3 py-3 rounded-xl transition-colors disabled:opacity-40 ${
               editing
-                ? 'bg-gray-900 border border-red-900/60 active:bg-red-950/40'
-                : 'bg-gray-900 active:bg-gray-800'
+                ? 'bg-card border border-red-300 active:bg-red-50'
+                : 'bg-card ring-1 ring-line active:bg-sunk'
             }`}
           >
-            <p className="text-white text-sm font-medium leading-snug">{meal.name}</p>
-            <p className="text-gray-500 text-xs mt-0.5">
+            <p className="text-ink text-sm font-medium leading-snug">{meal.name}</p>
+            <p className="text-muted text-xs mt-0.5">
               {editing
                 ? 'Tap to remove'
                 : `${meal.kcal} kcal · ${meal.protein_g} g${justLogged === meal.id ? ' · logged ✓' : ''}`}
@@ -62,7 +62,7 @@ export default function SavedMealList({ meals }: { meals: SavedMeal[] }) {
         ))}
       </div>
       {error && (
-        <p role="alert" className="text-red-400 text-sm mt-2">
+        <p role="alert" className="text-red-700 text-sm mt-2">
           {error}
         </p>
       )}

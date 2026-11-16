@@ -11,12 +11,12 @@ export default function TrackRunning({ entry, serverNowMs }: { entry: TimeEntry;
   const [isPending, startTransition] = useTransition()
 
   return (
-    <div className="bg-gray-900 rounded-xl p-4 flex items-center gap-3">
+    <div className="bg-card ring-1 ring-line rounded-xl p-4 flex items-center gap-3">
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-500">Tracking</p>
-        <p className="text-white font-semibold truncate">
+        <p className="text-xs text-muted">Tracking</p>
+        <p className="text-ink font-semibold truncate">
           {CATEGORIES[entry.category].label}
-          {entry.label ? <span className="text-gray-400 font-normal"> · {entry.label}</span> : null}
+          {entry.label ? <span className="text-muted font-normal"> · {entry.label}</span> : null}
         </p>
         <p className="text-2xl font-bold tabular-nums mt-1" role="timer">
           {formatClock(elapsedSeconds(entry, now))}
@@ -25,7 +25,7 @@ export default function TrackRunning({ entry, serverNowMs }: { entry: TimeEntry;
       <button
         onClick={() => startTransition(() => stopEntry())}
         disabled={isPending}
-        className="shrink-0 px-5 py-3 bg-blue-600 active:bg-blue-700 text-white font-semibold rounded-xl disabled:opacity-40"
+        className="shrink-0 px-5 py-3 bg-accent active:bg-accent-strong text-white font-semibold rounded-xl disabled:opacity-40"
       >
         Stop
       </button>

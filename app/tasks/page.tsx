@@ -58,12 +58,12 @@ export default async function TasksPage() {
   const other = tasks.filter(t => !t.domain)
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Tasks</h1>
           {top3Count > 0 && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted">
               {top3Count}/3 in Top 3 today
             </span>
           )}
@@ -71,8 +71,8 @@ export default async function TasksPage() {
 
         {tasks.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-600 text-base">No open tasks.</p>
-            <p className="text-gray-700 text-sm mt-1">
+            <p className="text-faint text-base">No open tasks.</p>
+            <p className="text-faint text-sm mt-1">
               Triage captures in the Inbox to create tasks.
             </p>
           </div>
@@ -87,12 +87,12 @@ export default async function TasksPage() {
         {(projectCount.count ?? 0) > 0 && (
           <Link
             href="/projects"
-            className="flex items-center justify-between bg-gray-900 rounded-xl px-4 py-4 active:bg-gray-800"
+            className="flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-4 active:bg-sunk"
           >
-            <span className="text-gray-300 text-sm">
+            <span className="text-ink-soft text-sm">
               {projectCount.count} more in Projects
             </span>
-            <span className="text-gray-600 text-sm">→</span>
+            <span className="text-faint text-sm">→</span>
           </Link>
         )}
       </div>
@@ -116,10 +116,10 @@ function TaskGroup({
   if (tasks.length === 0) return null
   return (
     <section className="mb-6">
-      <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
+      <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
         {label}
       </h2>
-      <div className="bg-gray-900 rounded-xl px-4">
+      <div className="bg-card ring-1 ring-line rounded-xl px-4">
         {tasks.map(task => (
           <TaskCard
             key={task.id}

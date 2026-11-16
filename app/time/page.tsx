@@ -45,10 +45,10 @@ export default async function TimePage({
     : null
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24">
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/today" className="text-gray-500 active:text-gray-300 text-sm">
+          <Link href="/today" className="text-muted active:text-ink-soft text-sm">
             ← Today
           </Link>
           <h1 className="text-2xl font-bold">{open?.mode === 'focus' ? 'Focus' : 'Time'}</h1>
@@ -64,7 +64,7 @@ export default async function TimePage({
 
             {!focusTarget && (
               <div>
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
                   {open ? 'Switch to' : 'What are you doing?'}
                 </h2>
                 <CategoryGrid current={open?.category ?? null} />

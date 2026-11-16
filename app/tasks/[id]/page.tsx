@@ -26,11 +26,11 @@ export default async function TaskDetailPage({
   if (task.status === 'done') redirect('/tasks')
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-12">
         <Link
           href="/tasks"
-          className="text-gray-500 text-sm active:text-gray-300 transition-colors inline-block mb-6"
+          className="text-muted text-sm active:text-ink-soft transition-colors inline-block mb-6"
         >
           ← Tasks
         </Link>

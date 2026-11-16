@@ -14,17 +14,17 @@ export default function FuelLine({ kcal, protein, kcalTarget, proteinTarget }: F
   return (
     <Link
       href="/fuel"
-      className="mb-6 flex items-center justify-between bg-gray-900 rounded-xl px-4 py-3 active:bg-gray-800"
+      className="mb-6 flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-3 active:bg-sunk"
     >
-      <span className="text-sm text-gray-300">
-        <span className="text-gray-500">Fuel</span>{' '}
+      <span className="text-sm text-ink-soft">
+        <span className="text-muted">Fuel</span>{' '}
         <span className="tabular-nums">
           {fmt(kcal)}
           {kcalTarget ? ` / ${fmt(kcalTarget)}` : ''} kcal · {protein}
           {proteinTarget ? ` / ${proteinTarget}` : ''} g
         </span>
       </span>
-      <span className="text-blue-400 text-lg leading-none" aria-label="Log food">
+      <span className="text-accent-ink text-lg leading-none" aria-label="Log food">
         +
       </span>
     </Link>

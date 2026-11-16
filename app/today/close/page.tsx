@@ -60,33 +60,33 @@ export default async function ClosePage() {
   const pinnedLeft = tasks.filter(t => t.is_top3 && t.top3_date === today).length
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-12">
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/today" className="text-gray-500 active:text-gray-300 text-sm">
+          <Link href="/today" className="text-muted active:text-ink-soft text-sm">
             ← Today
           </Link>
           <h1 className="text-2xl font-bold">Close the day</h1>
         </div>
 
-        <section className="bg-gray-900 rounded-xl px-4 py-4 mb-6 space-y-1.5 text-sm">
-          <p className="text-gray-300">
+        <section className="bg-card ring-1 ring-line rounded-xl px-4 py-4 mb-6 space-y-1.5 text-sm">
+          <p className="text-ink-soft">
             {doneToday.count ?? 0} task{doneToday.count === 1 ? '' : 's'} done
             {pinnedLeft > 0 ? ` · ${pinnedLeft} of today's Top 3 still open` : ''}
           </p>
           {summary.focusSessions > 0 && (
-            <p className="text-gray-300">
+            <p className="text-ink-soft">
               {formatMinutes(summary.focusMinutes)} focused across {summary.focusSessions} session
               {summary.focusSessions === 1 ? '' : 's'}
             </p>
           )}
           {categories.length > 0 && (
-            <p className="text-gray-500">
+            <p className="text-muted">
               {categories.map(([c, m]) => `${CATEGORIES[c].label} ${formatMinutes(m)}`).join(' · ')}
             </p>
           )}
           {foodEntries.length > 0 && (
-            <p className="text-gray-300">
+            <p className="text-ink-soft">
               {fuel.kcal.toLocaleString('en-GB')}
               {dayLog.kcal_target ? ` of ${dayLog.kcal_target.toLocaleString('en-GB')}` : ''} kcal ·{' '}
               {fuel.protein_g}

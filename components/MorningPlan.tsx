@@ -73,28 +73,28 @@ export default function MorningPlan({ tasks, workTasks = [], preselectedTaskId =
   const full = selected.length >= 3
 
   return (
-    <div className="fixed inset-0 z-[60] bg-gray-950 flex flex-col">
-      <div className="flex items-center justify-between px-4 pt-12 pb-4 border-b border-gray-800">
-        <h1 className="text-xl font-bold text-white">Morning Plan</h1>
+    <div className="fixed inset-0 z-[60] bg-paper flex flex-col">
+      <div className="flex items-center justify-between px-4 pt-12 pb-4 border-b border-line">
+        <h1 className="text-xl font-bold text-ink">Morning Plan</h1>
         <button
           onClick={handleSkip}
           disabled={isPending}
-          className="text-gray-500 text-sm active:text-gray-300 disabled:opacity-40 px-2 py-1"
+          className="text-muted text-sm active:text-ink-soft disabled:opacity-40 px-2 py-1"
         >
           Skip
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
-        <p className="text-gray-500 text-sm">
+        <p className="text-muted text-sm">
           Tap your one thing first, then up to two more.
-          {full && <span className="text-blue-400"> Top 3 full.</span>}
+          {full && <span className="text-accent-ink"> Top 3 full.</span>}
         </p>
 
         {tasks.length === 0 && workTasks.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-gray-600">Nothing from yesterday or due today.</p>
-            <p className="text-gray-700 text-sm mt-1">You&rsquo;re starting fresh.</p>
+            <p className="text-faint">Nothing from yesterday or due today.</p>
+            <p className="text-faint text-sm mt-1">You&rsquo;re starting fresh.</p>
           </div>
         )}
 
@@ -121,12 +121,12 @@ export default function MorningPlan({ tasks, workTasks = [], preselectedTaskId =
           <div>
             <button
               onClick={() => setShowWork(s => !s)}
-              className="w-full flex items-center justify-between px-3 py-3 bg-gray-900 rounded-xl active:bg-gray-800"
+              className="w-full flex items-center justify-between px-3 py-3 bg-card ring-1 ring-line rounded-xl active:bg-sunk"
             >
-              <span className="text-gray-400 text-sm font-medium">
+              <span className="text-muted text-sm font-medium">
                 Pull from work · {workTasks.length} due today
               </span>
-              <span className="text-gray-600 text-xs">{showWork ? 'Hide ↑' : 'Show ↓'}</span>
+              <span className="text-faint text-xs">{showWork ? 'Hide ↑' : 'Show ↓'}</span>
             </button>
             {showWork && (
               <div className="space-y-1 mt-2">
@@ -146,18 +146,18 @@ export default function MorningPlan({ tasks, workTasks = [], preselectedTaskId =
         )}
       </div>
 
-      <div className="px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-4 border-t border-gray-800 space-y-2">
+      <div className="px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-4 border-t border-line space-y-2">
         <button
           onClick={handleConfirm}
           disabled={isPending}
-          className="w-full py-3.5 bg-blue-600 active:bg-blue-700 text-white font-semibold rounded-xl disabled:opacity-40 transition-colors"
+          className="w-full py-3.5 bg-accent active:bg-accent-strong text-white font-semibold rounded-xl disabled:opacity-40 transition-colors"
         >
           {selected.length === 0 ? 'Start with empty Top 3' : `Set today (${selected.length})`}
         </button>
         <button
           onClick={handleSkip}
           disabled={isPending}
-          className="w-full py-2 text-gray-600 text-sm active:text-gray-400 disabled:opacity-40"
+          className="w-full py-2 text-faint text-sm active:text-muted disabled:opacity-40"
         >
           Skip for today
         </button>
@@ -169,7 +169,7 @@ export default function MorningPlan({ tasks, workTasks = [], preselectedTaskId =
 function PlanGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{label}</h2>
+      <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">{label}</h2>
       <div className="space-y-1">{children}</div>
     </div>
   )
@@ -197,23 +197,23 @@ function PlanRow({
       aria-pressed={isSelected}
       className={`w-full text-left px-3 py-3 rounded-xl transition-colors flex items-center gap-3 ${
         isSelected
-          ? 'bg-blue-600/20 border border-blue-600/50'
+          ? 'bg-accent-soft border border-accent/40'
           : disabled
-          ? 'bg-gray-900/50 opacity-40'
-          : 'bg-gray-900 active:bg-gray-800'
+          ? 'bg-card/60 opacity-40'
+          : 'bg-card ring-1 ring-line active:bg-sunk'
       }`}
     >
       <span
         className={`w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center text-xs ${
-          isSelected ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-600'
+          isSelected ? 'border-accent bg-accent text-white' : 'border-faint'
         }`}
       >
         {isSelected ? order + 1 : ''}
       </span>
-      <p className="flex-1 text-white text-sm leading-snug">{title}</p>
-      {order === 0 && <span className="text-xs text-blue-300 shrink-0">one thing</span>}
+      <p className="flex-1 text-ink text-sm leading-snug">{title}</p>
+      {order === 0 && <span className="text-xs text-accent-ink shrink-0">one thing</span>}
       {badge && order !== 0 && (
-        <span className="text-xs px-1.5 py-0.5 rounded shrink-0 bg-gray-800 text-gray-400 max-w-[40%] truncate">
+        <span className="text-xs px-1.5 py-0.5 rounded shrink-0 bg-sunk text-muted max-w-[40%] truncate">
           {badge}
         </span>
       )}

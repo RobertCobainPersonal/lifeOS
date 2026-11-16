@@ -17,8 +17,8 @@ interface EnergyPickerProps {
 export default function EnergyPicker({ value, onChange }: EnergyPickerProps) {
   return (
     <div>
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-        Energy <span className="normal-case font-normal text-gray-600">(optional)</span>
+      <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
+        Energy <span className="normal-case font-normal text-faint">(optional)</span>
       </p>
       <div className="flex gap-2" role="group" aria-label="Energy level">
         {LEVELS.map(level => (
@@ -30,15 +30,15 @@ export default function EnergyPicker({ value, onChange }: EnergyPickerProps) {
             aria-label={`${level.value} ${level.label}`}
             className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
               value === level.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-900 text-gray-400 active:bg-gray-800'
+                ? 'bg-accent text-white'
+                : 'bg-card ring-1 ring-line text-muted active:bg-sunk'
             }`}
           >
             {level.value}
           </button>
         ))}
       </div>
-      <p className="text-xs text-gray-600 mt-1 h-4">
+      <p className="text-xs text-faint mt-1 h-4">
         {value ? LEVELS[value - 1].label : ''}
       </p>
     </div>

@@ -40,18 +40,18 @@ export default function NewProjectForm() {
           aria-label="New project name"
           maxLength={80}
           autoComplete="off"
-          className="flex-1 bg-gray-900 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-blue-600"
+          className="flex-1 bg-card ring-1 ring-line rounded-xl px-4 py-3 text-ink placeholder-faint text-base focus:outline-none focus:ring-1 focus:ring-accent"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="px-4 bg-gray-800 active:bg-gray-700 text-white text-sm font-medium rounded-xl disabled:opacity-40"
+          className="px-4 bg-sunk active:bg-line-strong text-ink text-sm font-medium rounded-xl disabled:opacity-40"
         >
           Add
         </button>
       </div>
       {error && (
-        <p role="alert" className="text-red-400 text-sm mt-2">
+        <p role="alert" className="text-red-700 text-sm mt-2">
           {error}
         </p>
       )}

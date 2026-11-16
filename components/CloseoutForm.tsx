@@ -41,24 +41,24 @@ export default function CloseoutForm({
     <form onSubmit={handleSubmit} className="space-y-5">
       {prompts.map((prompt, i) => (
         <label key={i} className="block">
-          <span className="text-sm text-gray-300">{prompt}</span>
+          <span className="text-sm text-ink-soft">{prompt}</span>
           <textarea
             value={answers[i]}
             onChange={e => setAnswers(prev => prev.map((a, j) => (j === i ? e.target.value : a)))}
             rows={3}
             maxLength={2000}
-            className="mt-1 w-full bg-gray-900 rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:ring-1 focus:ring-blue-600"
+            className="mt-1 w-full bg-card ring-1 ring-line rounded-xl px-4 py-3 text-ink text-base focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </label>
       ))}
 
       {tomorrowOptions.length > 0 && (
         <label className="block">
-          <span className="text-sm text-gray-300">Tomorrow&rsquo;s one thing (optional)</span>
+          <span className="text-sm text-ink-soft">Tomorrow&rsquo;s one thing (optional)</span>
           <select
             value={tomorrowId}
             onChange={e => setTomorrowId(e.target.value)}
-            className="mt-1 w-full bg-gray-900 rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:ring-1 focus:ring-blue-600"
+            className="mt-1 w-full bg-card ring-1 ring-line rounded-xl px-4 py-3 text-ink text-base focus:outline-none focus:ring-1 focus:ring-accent"
           >
             <option value="">Decide in the morning</option>
             {tomorrowOptions.map(t => (
@@ -71,7 +71,7 @@ export default function CloseoutForm({
       )}
 
       {error && (
-        <p role="alert" className="text-red-400 text-sm">
+        <p role="alert" className="text-red-700 text-sm">
           {error}
         </p>
       )}
@@ -79,7 +79,7 @@ export default function CloseoutForm({
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-3.5 bg-blue-600 active:bg-blue-700 text-white font-semibold rounded-xl disabled:opacity-40"
+        className="w-full py-3.5 bg-accent active:bg-accent-strong text-white font-semibold rounded-xl disabled:opacity-40"
       >
         {isPending ? 'Saving…' : 'Close the day'}
       </button>

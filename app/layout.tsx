@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black',
+    statusBarStyle: 'default',
     title: 'LifeOS',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#030712',
+  themeColor: '#faf7f2',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -31,7 +31,7 @@ export default function RootLayout({
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
-      <body className="antialiased bg-gray-950">{children}</body>
+      <body className="antialiased bg-paper text-ink">{children}</body>
     </html>
   )
 }

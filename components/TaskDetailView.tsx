@@ -71,21 +71,21 @@ export default function TaskDetailView({
         type="text"
         value={editTitle}
         onChange={e => { setEditTitle(e.target.value); markDirty() }}
-        className="w-full bg-transparent text-white text-2xl font-bold focus:outline-none placeholder-gray-700 leading-tight"
+        className="w-full bg-transparent text-ink text-2xl font-bold focus:outline-none placeholder-faint leading-tight"
         placeholder="Task title"
       />
 
       {/* Meta fields */}
-      <div className="space-y-3 pb-4 border-b border-gray-800">
+      <div className="space-y-3 pb-4 border-b border-line">
         <div className="flex gap-2 items-center">
-          <span className="text-gray-600 text-xs w-14 shrink-0">Domain</span>
+          <span className="text-faint text-xs w-14 shrink-0">Domain</span>
           {(['work', 'personal'] as const).map(d => (
             <button
               key={d}
               type="button"
               onClick={() => { setEditDomain(editDomain === d ? null : d); markDirty() }}
               className={`px-3 py-1 rounded-full text-xs transition-colors ${
-                editDomain === d ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400'
+                editDomain === d ? 'bg-accent text-white' : 'bg-sunk text-muted'
               }`}
             >
               {d}
@@ -94,7 +94,7 @@ export default function TaskDetailView({
         </div>
 
         <div className="flex gap-2 items-center">
-          <span className="text-gray-600 text-xs w-14 shrink-0">Energy</span>
+          <span className="text-faint text-xs w-14 shrink-0">Energy</span>
           {(['deep', 'admin'] as const).map(e => (
             <button
               key={e}
@@ -103,9 +103,9 @@ export default function TaskDetailView({
               className={`px-3 py-1 rounded-full text-xs transition-colors ${
                 editEnergy === e
                   ? e === 'deep'
-                    ? 'bg-purple-700 text-purple-100'
-                    : 'bg-gray-600 text-white'
-                  : 'bg-gray-800 text-gray-400'
+                    ? 'bg-purple-700 text-white'
+                    : 'bg-line-strong text-ink'
+                  : 'bg-sunk text-muted'
               }`}
             >
               {e}
@@ -114,19 +114,19 @@ export default function TaskDetailView({
         </div>
 
         <div className="flex gap-2 items-center">
-          <span className="text-gray-600 text-xs w-14 shrink-0">Due</span>
+          <span className="text-faint text-xs w-14 shrink-0">Due</span>
           <input
             type="date"
             value={editDueDate}
             onChange={e => { setEditDueDate(e.target.value); markDirty() }}
-            className="bg-gray-800 text-gray-300 px-2 py-1 rounded-lg text-sm focus:outline-none"
+            className="bg-sunk text-ink-soft px-2 py-1 rounded-lg text-sm focus:outline-none"
             style={{ colorScheme: 'dark' }}
           />
           {editDueDate && (
             <button
               type="button"
               onClick={() => { setEditDueDate(''); markDirty() }}
-              className="text-gray-600 text-xs"
+              className="text-faint text-xs"
             >
               clear
             </button>
@@ -136,12 +136,12 @@ export default function TaskDetailView({
 
       {/* Notes */}
       <div className="flex-1">
-        <p className="text-xs text-gray-600 uppercase tracking-wide mb-3">Notes</p>
+        <p className="text-xs text-faint uppercase tracking-wide mb-3">Notes</p>
         <textarea
           value={editDetails}
           onChange={e => { setEditDetails(e.target.value); markDirty() }}
           rows={12}
-          className="w-full bg-gray-900 text-gray-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gray-700 resize-none placeholder-gray-700 leading-relaxed"
+          className="w-full bg-card ring-1 ring-line text-ink-soft px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-line-strong resize-none placeholder-faint leading-relaxed"
           placeholder="Context, links, acceptance criteria, next steps…"
         />
       </div>
@@ -151,14 +151,14 @@ export default function TaskDetailView({
         <button
           onClick={handleSave}
           disabled={!isDirty || !editTitle.trim() || isPending}
-          className="flex-1 py-3 bg-blue-600 active:bg-blue-700 text-white text-sm font-medium rounded-xl disabled:opacity-40 transition-colors"
+          className="flex-1 py-3 bg-accent active:bg-accent-strong text-white text-sm font-medium rounded-xl disabled:opacity-40 transition-colors"
         >
           {saveLabel === 'saving' ? 'Saving…' : saveLabel === 'saved' ? 'Saved ✓' : 'Save changes'}
         </button>
         <button
           onClick={handleComplete}
           disabled={isPending}
-          className="px-5 py-3 bg-gray-800 active:bg-gray-700 text-green-500 text-sm font-medium rounded-xl disabled:opacity-40 transition-colors"
+          className="px-5 py-3 bg-sunk active:bg-line-strong text-green-700 text-sm font-medium rounded-xl disabled:opacity-40 transition-colors"
         >
           Done ✓
         </button>

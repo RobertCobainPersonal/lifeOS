@@ -41,7 +41,7 @@ export default function AddProjectTask({ projectId }: { projectId: string }) {
         aria-label="New project task"
         maxLength={200}
         autoComplete="off"
-        className="w-full bg-gray-900 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-blue-600"
+        className="w-full bg-card ring-1 ring-line rounded-xl px-4 py-3 text-ink placeholder-faint text-base focus:outline-none focus:ring-1 focus:ring-accent"
       />
       <div className="flex gap-2">
         <div className="flex flex-1 gap-1" role="group" aria-label="List">
@@ -52,7 +52,7 @@ export default function AddProjectTask({ projectId }: { projectId: string }) {
               onClick={() => setBandChoice(b)}
               aria-pressed={band === b}
               className={`flex-1 py-2 rounded-lg text-sm font-medium ${
-                band === b ? 'bg-blue-600 text-white' : 'bg-gray-900 text-gray-400 active:bg-gray-800'
+                band === b ? 'bg-accent text-white' : 'bg-card ring-1 ring-line text-muted active:bg-sunk'
               }`}
             >
               {BAND_LABEL[b]}
@@ -62,13 +62,13 @@ export default function AddProjectTask({ projectId }: { projectId: string }) {
         <button
           type="submit"
           disabled={isPending}
-          className="px-4 bg-gray-800 active:bg-gray-700 text-white text-sm font-medium rounded-lg disabled:opacity-40"
+          className="px-4 bg-sunk active:bg-line-strong text-ink text-sm font-medium rounded-lg disabled:opacity-40"
         >
           Add
         </button>
       </div>
       {error && (
-        <p role="alert" className="text-red-400 text-sm">
+        <p role="alert" className="text-red-700 text-sm">
           {error}
         </p>
       )}

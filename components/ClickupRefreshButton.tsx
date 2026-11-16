@@ -17,7 +17,7 @@ export default function ClickupRefreshButton() {
     <button
       onClick={handleRefresh}
       disabled={refreshing}
-      className="text-gray-500 text-sm active:text-gray-300 disabled:opacity-40 transition-colors"
+      className="text-muted text-sm active:text-ink-soft disabled:opacity-40 transition-colors"
       aria-label="Refresh ClickUp tasks"
     >
       {refreshing ? '↻ Syncing…' : '↻ Refresh'}

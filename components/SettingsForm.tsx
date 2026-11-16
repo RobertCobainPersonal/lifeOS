@@ -37,18 +37,18 @@ export default function SettingsForm({ currentDays }: SettingsFormProps) {
           onChange={e => setDays(Number(e.target.value))}
           min={1}
           max={90}
-          className="w-16 bg-gray-800 text-white text-center px-2 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-600"
+          className="w-16 bg-sunk text-ink text-center px-2 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-line-strong"
         />
-        <span className="text-gray-400 text-sm">days</span>
+        <span className="text-muted text-sm">days</span>
       </div>
       <button
         type="submit"
         disabled={isPending || days === currentDays}
-        className="px-4 py-2 bg-blue-600 active:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-40 transition-colors"
+        className="px-4 py-2 bg-accent active:bg-accent-strong text-white text-sm font-medium rounded-lg disabled:opacity-40 transition-colors"
       >
         {isPending ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
       </button>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
     </form>
   )
 }

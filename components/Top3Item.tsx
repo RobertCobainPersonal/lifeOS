@@ -47,27 +47,27 @@ export default function Top3Item({ id, title, energy, dueDate, focusHref }: Top3
   const isOverdue = dueDate && dueDate < today
 
   return (
-    <div className="bg-gray-900 rounded-xl p-4 mb-2 flex items-start gap-3">
+    <div className="bg-card ring-1 ring-line rounded-xl p-4 mb-2 flex items-start gap-3">
       <button
         onClick={handleComplete}
         disabled={isPending}
-        className="mt-0.5 w-7 h-7 shrink-0 rounded-full border-2 border-gray-500 active:border-green-500 active:bg-green-500/10 disabled:opacity-40 transition-colors"
+        className="mt-0.5 w-7 h-7 shrink-0 rounded-full border-2 border-faint active:border-green-500 active:bg-green-500/10 disabled:opacity-40 transition-colors"
         aria-label={`Complete "${title}"`}
       />
       <div className="flex-1 min-w-0">
-        <p className="text-white text-base font-medium leading-snug">{title}</p>
+        <p className="text-ink text-base font-medium leading-snug">{title}</p>
         <div className="flex items-center gap-2 mt-1 flex-wrap">
           {energy && (
             <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
               energy === 'deep'
-                ? 'bg-purple-900/60 text-purple-300'
-                : 'bg-gray-800 text-gray-400'
+                ? 'bg-purple-100 text-purple-800'
+                : 'bg-sunk text-muted'
             }`}>
               {energy}
             </span>
           )}
           {dueDate && (
-            <span className={`text-xs ${isOverdue ? 'text-red-400' : 'text-gray-500'}`}>
+            <span className={`text-xs ${isOverdue ? 'text-red-700' : 'text-muted'}`}>
               {isOverdue ? 'overdue · ' : ''}{dueDate}
             </span>
           )}
@@ -76,7 +76,7 @@ export default function Top3Item({ id, title, energy, dueDate, focusHref }: Top3
       {focusHref && (
         <Link
           href={focusHref}
-          className="shrink-0 px-2.5 py-1 text-xs font-medium text-blue-300 bg-blue-600/15 active:bg-blue-600/30 rounded-lg"
+          className="shrink-0 px-2.5 py-1 text-xs font-medium text-accent-ink bg-accent-soft active:bg-accent/25 rounded-lg"
           aria-label={`Start focus on "${title}"`}
         >
           Focus
@@ -85,7 +85,7 @@ export default function Top3Item({ id, title, energy, dueDate, focusHref }: Top3
       <button
         onClick={handleRemove}
         disabled={isPending}
-        className="text-yellow-500 active:text-gray-500 text-xl shrink-0 disabled:opacity-40 transition-colors"
+        className="text-amber-600 active:text-muted text-xl shrink-0 disabled:opacity-40 transition-colors"
         aria-label={`Remove "${title}" from Top 3`}
       >
         ★

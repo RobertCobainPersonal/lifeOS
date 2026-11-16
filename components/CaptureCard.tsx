@@ -37,13 +37,13 @@ export default function CaptureCard({ id, rawText, createdAt, source, url }: Cap
   if (dismissed) return null
 
   return (
-    <div className="bg-gray-900 rounded-xl p-4 mb-3">
-      <p className={`text-base leading-snug mb-2 break-words ${isEmpty ? 'text-gray-500 italic' : 'text-white'}`}>
+    <div className="bg-card ring-1 ring-line rounded-xl p-4 mb-3">
+      <p className={`text-base leading-snug mb-2 break-words ${isEmpty ? 'text-muted italic' : 'text-ink'}`}>
         {displayText}
       </p>
 
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <span className="text-xs text-gray-600">
+        <span className="text-xs text-faint">
           {new Date(createdAt).toLocaleString('en-GB', {
             day: 'numeric',
             month: 'short',
@@ -52,7 +52,7 @@ export default function CaptureCard({ id, rawText, createdAt, source, url }: Cap
           })}
         </span>
         {source && source !== 'manual' && (
-          <span className="text-xs text-gray-600 bg-gray-800 px-1.5 py-0.5 rounded">
+          <span className="text-xs text-faint bg-sunk px-1.5 py-0.5 rounded">
             {source}
           </span>
         )}
@@ -61,7 +61,7 @@ export default function CaptureCard({ id, rawText, createdAt, source, url }: Cap
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-blue-600 hover:text-blue-400"
+            className="text-xs text-accent-ink hover:text-accent-ink"
           >
             source link
           </a>
@@ -81,7 +81,7 @@ export default function CaptureCard({ id, rawText, createdAt, source, url }: Cap
             <button
               onClick={() => setShowForm(true)}
               disabled={isPending}
-              className="px-4 py-2.5 bg-blue-600 active:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-40 transition-colors"
+              className="px-4 py-2.5 bg-accent active:bg-accent-strong text-white text-sm font-medium rounded-lg disabled:opacity-40 transition-colors"
             >
               Task
             </button>
@@ -89,21 +89,21 @@ export default function CaptureCard({ id, rawText, createdAt, source, url }: Cap
           <button
             onClick={() => handleTriage('someday')}
             disabled={isPending}
-            className="px-4 py-2.5 bg-gray-800 active:bg-gray-700 text-gray-300 text-sm rounded-lg disabled:opacity-40 transition-colors"
+            className="px-4 py-2.5 bg-sunk active:bg-line-strong text-ink-soft text-sm rounded-lg disabled:opacity-40 transition-colors"
           >
             Someday
           </button>
           <button
             onClick={() => handleTriage('done')}
             disabled={isPending}
-            className="px-4 py-2.5 bg-gray-800 active:bg-gray-700 text-gray-300 text-sm rounded-lg disabled:opacity-40 transition-colors"
+            className="px-4 py-2.5 bg-sunk active:bg-line-strong text-ink-soft text-sm rounded-lg disabled:opacity-40 transition-colors"
           >
             Done
           </button>
           <button
             onClick={() => handleTriage('deleted')}
             disabled={isPending}
-            className="px-4 py-2.5 bg-gray-800 active:bg-gray-700 text-red-500 text-sm rounded-lg disabled:opacity-40 transition-colors"
+            className="px-4 py-2.5 bg-sunk active:bg-line-strong text-red-700 text-sm rounded-lg disabled:opacity-40 transition-colors"
           >
             Delete
           </button>
@@ -111,7 +111,7 @@ export default function CaptureCard({ id, rawText, createdAt, source, url }: Cap
       )}
 
       {error && (
-        <p role="alert" className="text-red-400 text-xs mt-2">{error}</p>
+        <p role="alert" className="text-red-700 text-xs mt-2">{error}</p>
       )}
     </div>
   )
@@ -167,11 +167,11 @@ function TaskForm({
         onChange={e => setTitle(e.target.value)}
         placeholder="Task title"
         autoFocus
-        className="w-full bg-gray-800 text-white px-3 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-600 placeholder-gray-600"
+        className="w-full bg-sunk text-ink px-3 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-line-strong placeholder-faint"
       />
 
       <div>
-        <p className="text-xs text-gray-500 mb-1.5">Domain</p>
+        <p className="text-xs text-muted mb-1.5">Domain</p>
         <div className="flex gap-2">
           {(['work', 'personal'] as const).map(d => (
             <button
@@ -180,8 +180,8 @@ function TaskForm({
               onClick={() => setDomain(d)}
               className={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-colors capitalize ${
                 domain === d
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-800 text-gray-400 active:bg-gray-700'
+                  ? 'bg-accent text-white'
+                  : 'bg-sunk text-muted active:bg-line-strong'
               }`}
             >
               {d}
@@ -191,7 +191,7 @@ function TaskForm({
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 mb-1.5">Energy</p>
+        <p className="text-xs text-muted mb-1.5">Energy</p>
         <div className="flex gap-2">
           {(['deep', 'admin'] as const).map(e => (
             <button
@@ -201,7 +201,7 @@ function TaskForm({
               className={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-colors capitalize ${
                 energy === e
                   ? 'bg-purple-600 text-white'
-                  : 'bg-gray-800 text-gray-400 active:bg-gray-700'
+                  : 'bg-sunk text-muted active:bg-line-strong'
               }`}
             >
               {e}
@@ -211,34 +211,34 @@ function TaskForm({
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 mb-1.5">Due date (optional)</p>
+        <p className="text-xs text-muted mb-1.5">Due date (optional)</p>
         <input
           type="date"
           value={dueDate}
           onChange={e => setDueDate(e.target.value)}
-          className="w-full bg-gray-800 text-gray-300 px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+          className="w-full bg-sunk text-ink-soft px-3 py-2.5 rounded-lg text-sm focus:outline-none"
           style={{ colorScheme: 'dark' }}
         />
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 mb-1.5">Notes (optional)</p>
+        <p className="text-xs text-muted mb-1.5">Notes (optional)</p>
         <textarea
           value={details}
           onChange={e => setDetails(e.target.value)}
           rows={3}
-          className="w-full bg-gray-800 text-gray-300 px-3 py-2.5 rounded-lg text-sm focus:outline-none resize-none placeholder-gray-600"
+          className="w-full bg-sunk text-ink-soft px-3 py-2.5 rounded-lg text-sm focus:outline-none resize-none placeholder-faint"
           placeholder="Context, links, acceptance criteria…"
         />
       </div>
 
-      {error && <p role="alert" className="text-red-400 text-xs">{error}</p>}
+      {error && <p role="alert" className="text-red-700 text-xs">{error}</p>}
 
       <div className="flex gap-2 pt-1">
         <button
           type="submit"
           disabled={!canSubmit}
-          className="flex-1 py-2.5 bg-blue-600 active:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-40 text-sm transition-colors"
+          className="flex-1 py-2.5 bg-accent active:bg-accent-strong text-white font-medium rounded-lg disabled:opacity-40 text-sm transition-colors"
         >
           {isPending ? 'Saving…' : 'Save Task'}
         </button>
@@ -246,7 +246,7 @@ function TaskForm({
           type="button"
           onClick={onCancel}
           disabled={isPending}
-          className="px-4 py-2.5 bg-gray-800 active:bg-gray-700 text-gray-400 rounded-lg text-sm transition-colors"
+          className="px-4 py-2.5 bg-sunk active:bg-line-strong text-muted rounded-lg text-sm transition-colors"
         >
           Cancel
         </button>

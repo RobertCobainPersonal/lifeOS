@@ -55,15 +55,15 @@ export default function OneThingCard({ oneThing, options, focusHref }: OneThingC
 
   return (
     <section className="mb-6" aria-label="One thing">
-      <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
+      <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
         One thing
       </h2>
-      <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
+      <div className="bg-card rounded-xl p-4 border border-line">
         {oneThing.state === 'none' && (
           <button
             onClick={() => setChoosing(c => !c)}
             disabled={isPending}
-            className="w-full text-left text-gray-300 text-base active:text-white disabled:opacity-40"
+            className="w-full text-left text-ink-soft text-base active:text-ink disabled:opacity-40"
           >
             Pick your one thing
           </button>
@@ -76,11 +76,11 @@ export default function OneThingCard({ oneThing, options, focusHref }: OneThingC
                 <button
                   onClick={() => complete(oneThing.id)}
                   disabled={isPending}
-                  className="mt-0.5 w-7 h-7 shrink-0 rounded-full border-2 border-gray-500 active:border-green-500 active:bg-green-500/10 disabled:opacity-40 transition-colors"
+                  className="mt-0.5 w-7 h-7 shrink-0 rounded-full border-2 border-faint active:border-green-500 active:bg-green-500/10 disabled:opacity-40 transition-colors"
                   aria-label={`Complete "${oneThing.title}"`}
                 />
               )}
-              <p className="flex-1 text-white text-lg font-semibold leading-snug">
+              <p className="flex-1 text-ink text-lg font-semibold leading-snug">
                 {oneThing.title}
               </p>
             </div>
@@ -88,7 +88,7 @@ export default function OneThingCard({ oneThing, options, focusHref }: OneThingC
               {focusHref && (
                 <Link
                   href={focusHref}
-                  className="px-4 py-2 bg-blue-600 active:bg-blue-700 text-white text-sm font-semibold rounded-lg"
+                  className="px-4 py-2 bg-accent active:bg-accent-strong text-white text-sm font-semibold rounded-lg"
                 >
                   Start focus
                 </Link>
@@ -97,7 +97,7 @@ export default function OneThingCard({ oneThing, options, focusHref }: OneThingC
                 <button
                   onClick={() => setChoosing(c => !c)}
                   disabled={isPending}
-                  className="text-gray-500 text-sm active:text-gray-300 disabled:opacity-40"
+                  className="text-muted text-sm active:text-ink-soft disabled:opacity-40"
                 >
                   Change
                 </button>
@@ -108,11 +108,11 @@ export default function OneThingCard({ oneThing, options, focusHref }: OneThingC
 
         {oneThing.state === 'done' && (
           <div className="flex items-center justify-between gap-3">
-            <p className="text-gray-500 text-base line-through leading-snug">{oneThing.title}</p>
+            <p className="text-muted text-base line-through leading-snug">{oneThing.title}</p>
             <button
               onClick={() => setChoosing(c => !c)}
               disabled={isPending}
-              className="shrink-0 text-blue-400 text-sm active:text-blue-300 disabled:opacity-40"
+              className="shrink-0 text-accent-ink text-sm active:text-accent-ink disabled:opacity-40"
             >
               Pick another
             </button>
@@ -120,11 +120,11 @@ export default function OneThingCard({ oneThing, options, focusHref }: OneThingC
         )}
 
         {choosing && (
-          <div className="mt-3 border-t border-gray-800 pt-2">
+          <div className="mt-3 border-t border-line pt-2">
             {others.length === 0 ? (
-              <p className="text-gray-500 text-sm py-2">
+              <p className="text-muted text-sm py-2">
                 Nothing in your Top 3 yet.{' '}
-                <Link href="/tasks" className="text-blue-400">
+                <Link href="/tasks" className="text-accent-ink">
                   Star a task
                 </Link>{' '}
                 first.
@@ -134,7 +134,7 @@ export default function OneThingCard({ oneThing, options, focusHref }: OneThingC
                 <button
                   key={`${o.kind}:${o.id}`}
                   onClick={() => choose(o)}
-                  className="w-full text-left py-2.5 text-gray-200 text-sm active:text-white border-b border-gray-800 last:border-0"
+                  className="w-full text-left py-2.5 text-ink-soft text-sm active:text-ink border-b border-line last:border-0"
                 >
                   {o.title}
                 </button>
@@ -144,7 +144,7 @@ export default function OneThingCard({ oneThing, options, focusHref }: OneThingC
         )}
 
         {error && (
-          <p role="alert" className="text-red-400 text-xs mt-2">
+          <p role="alert" className="text-red-700 text-xs mt-2">
             {error}
           </p>
         )}
