@@ -1,3 +1,4 @@
+import { addDays, londonDayStartIso, londonToday } from '@/lib/dates'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -17,11 +18,9 @@ export default async function TodayPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
 
-  const today = new Date().toISOString().split('T')[0]
-  const yesterdayDate = new Date()
-  yesterdayDate.setDate(yesterdayDate.getDate() - 1)
-  const yesterday = yesterdayDate.toISOString().split('T')[0]
-  const todayStart = `${today}T00:00:00.000Z`
+  const today = londonToday()
+  const yesterday = addDays(today, -1)
+  const todayStart = londonDayStartIso(today)
 
   // Get settings first (needed for slipping threshold)
   const settingsResult = await supabase

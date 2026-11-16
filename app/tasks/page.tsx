@@ -1,3 +1,4 @@
+import { londonToday } from '@/lib/dates'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import TaskCard from '@/components/TaskCard'
@@ -22,7 +23,7 @@ export default async function TasksPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
 
   const [tasksResult, countResult] = await Promise.all([
     supabase

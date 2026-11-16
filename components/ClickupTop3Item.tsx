@@ -1,5 +1,6 @@
 'use client'
 
+import { londonToday } from '@/lib/dates'
 import { useState, useTransition } from 'react'
 import { unpinClickUpFromTop3 } from '@/app/clickup/actions'
 
@@ -36,7 +37,7 @@ export default function ClickupTop3Item({
 
   if (removed) return null
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
   const isOverdue = dueDate && dueDate < today
 
   return (

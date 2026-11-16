@@ -1,3 +1,4 @@
+import { londonToday } from '@/lib/dates'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
@@ -45,7 +46,7 @@ export default async function ClickupPage() {
   const tasks = tasksResult.data ?? []
   const inboxCount = inboxCountResult.count ?? 0
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
 
   // Last sync time: from fresh sync or from cache
   const lastSyncedAt =

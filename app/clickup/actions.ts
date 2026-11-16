@@ -1,5 +1,6 @@
 'use server'
 
+import { londonToday } from '@/lib/dates'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
@@ -21,7 +22,7 @@ async function getTop3Count(supabase: Awaited<ReturnType<typeof createClient>>, 
 
 export async function pinClickUpToTop3(clickupId: string) {
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
 
   const total = await getTop3Count(supabase, today)
   if (total >= 3) throw new Error('Top 3 is full — remove one first')

@@ -1,5 +1,6 @@
 'use client'
 
+import { londonToday } from '@/lib/dates'
 import { useState, useTransition } from 'react'
 import { completeTask, removeFromTop3 } from '@/app/tasks/actions'
 
@@ -39,7 +40,7 @@ export default function Top3Item({ id, title, energy, dueDate }: Top3ItemProps) 
 
   if (done || removed) return null
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
   const isOverdue = dueDate && dueDate < today
 
   return (

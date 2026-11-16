@@ -1,11 +1,12 @@
 'use server'
 
+import { londonToday } from '@/lib/dates'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export async function resetMyDay(keepIds: string[], allShownIds: string[]) {
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
   const deferIds = allShownIds.filter(id => !keepIds.includes(id))
 
   // Clear today's top3 for local tasks
@@ -39,7 +40,7 @@ export async function resetMyDay(keepIds: string[], allShownIds: string[]) {
 
 export async function dismissMorningPlan() {
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
   const { error } = await supabase
     .from('settings')
     .update({ last_planned_date: today })
@@ -50,7 +51,7 @@ export async function dismissMorningPlan() {
 
 export async function confirmMorningPlan(taskIds: string[]) {
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const today = londonToday()
 
   // Clear any existing today top3 — morning plan is the authoritative daily reset
   const { error: clearError } = await supabase
