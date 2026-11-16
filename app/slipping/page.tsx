@@ -69,7 +69,7 @@ export default async function SlippingPage() {
         )}
       </div>
 
-      <BottomNav current="tasks" inboxCount={inboxCount} />
+      <BottomNav current="more" inboxCount={inboxCount} />
     </div>
   )
 }

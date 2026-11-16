@@ -96,7 +96,7 @@ export default async function ClickupPage() {
         )}
       </div>
 
-      <BottomNav current="tasks" inboxCount={inboxCount} />
+      <BottomNav current="more" inboxCount={inboxCount} />
     </div>
   )
 }

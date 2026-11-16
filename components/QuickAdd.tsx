@@ -6,9 +6,11 @@ import { createClient } from '@/lib/supabase/client'
 
 interface QuickAddProps {
   inboxCount: number
+  /** Sit above the bottom navigation instead of at the screen edge. */
+  aboveNav?: boolean
 }
 
-export default function QuickAdd({ inboxCount }: QuickAddProps) {
+export default function QuickAdd({ inboxCount, aboveNav = false }: QuickAddProps) {
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
   const [isPending, setIsPending] = useState(false)
@@ -37,7 +39,13 @@ export default function QuickAdd({ inboxCount }: QuickAddProps) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 sm:static sm:mb-6 bg-gray-900 border-t border-gray-800 sm:border sm:rounded-xl px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+    <div
+      className={`fixed left-0 right-0 z-50 sm:static sm:mb-6 bg-gray-900 border-t border-gray-800 sm:border sm:rounded-xl px-4 py-3 ${
+        aboveNav
+          ? 'bottom-[calc(3.5rem+env(safe-area-inset-bottom))] sm:pb-3'
+          : 'bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]'
+      }`}
+    >
       <form onSubmit={handleSubmit} className="flex items-center gap-3">
         <input
           type="text"

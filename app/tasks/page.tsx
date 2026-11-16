@@ -77,7 +77,7 @@ export default async function TasksPage() {
         )}
       </div>
 
-      <BottomNav current="tasks" inboxCount={inboxCount} />
+      <BottomNav current="more" inboxCount={inboxCount} />
     </div>
   )
 }
