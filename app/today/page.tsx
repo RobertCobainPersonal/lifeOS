@@ -8,6 +8,7 @@ import { getOpenEntry } from '@/lib/time-store'
 import NowRow from '@/components/NowRow'
 import FuelLine from '@/components/FuelLine'
 import { dayTotals } from '@/lib/fuel'
+import { describeActivity } from '@/lib/health'
 import QuickAdd from '@/components/QuickAdd'
 import BottomNav from '@/components/BottomNav'
 import OneThingCard, { type OneThingOption } from '@/components/OneThingCard'
@@ -46,6 +47,7 @@ export default async function TodayPage() {
     clickupTop3Result,
     clickupDueTodayResult,
     foodResult,
+    activityResult,
   ] = await Promise.all([
     supabase
       .from('tasks')
@@ -80,10 +82,20 @@ export default async function TodayPage() {
       .eq('due_date', today),
 
     supabase.from('food_entries').select('kcal, protein_g').eq('day', today),
+
+    // Most recent workout in the last three days
+    supabase
+      .from('activities')
+      .select('type, day, distance_m, moving_seconds')
+      .gte('day', addDays(today, -3))
+      .lte('day', today)
+      .order('started_at', { ascending: false })
+      .limit(1),
   ])
 
   const allOpen = allOpenResult.data ?? []
   const fuel = dayTotals(foodResult.data ?? [])
+  const latestActivity = activityResult.data?.[0] ?? null
   const inboxCount = inboxResult.count ?? 0
   const clickupTop3 = clickupTop3Result.data ?? []
   const clickupDueToday = clickupDueTodayResult.data ?? []
@@ -172,7 +184,10 @@ export default async function TodayPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Today</h1>
-            <p className="text-gray-500 text-sm">{dateLabel}</p>
+            <p className="text-gray-500 text-sm">
+              {dateLabel}
+              {latestActivity ? ` · ${describeActivity(latestActivity, today)}` : ''}
+            </p>
           </div>
           <Link
             href="/settings"
