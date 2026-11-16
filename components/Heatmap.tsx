@@ -38,7 +38,7 @@ export default function Heatmap({ grid }: { grid: HourRow[] }) {
 
   return (
     <div>
-      <table className="w-full border-separate border-spacing-[2px] text-xs">
+      <table className="w-full table-fixed border-separate border-spacing-[2px] text-xs">
         <caption className="sr-only">Minutes by hour of day and category</caption>
         <thead>
           <tr>
