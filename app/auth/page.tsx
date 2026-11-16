@@ -3,12 +3,16 @@
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { cleanCode } from '@/lib/auth'
 
 function AuthForm() {
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [code, setCode] = useState('')
+  const [codeError, setCodeError] = useState('')
+  const [verifying, setVerifying] = useState(false)
   const [error, setError] = useState(
     searchParams.get('error') === 'auth_failed' ? 'Link expired or already used — request a new one.' : ''
   )
@@ -25,7 +29,11 @@ function AuthForm() {
       },
     })
     if (error) {
-      setError(error.message)
+      setError(
+        error.status === 429
+          ? 'Too many emails requested. Wait a while, then try again, or use the last code you were sent.'
+          : error.message
+      )
       setLoading(false)
       return
     }
@@ -33,20 +41,66 @@ function AuthForm() {
     setLoading(false)
   }
 
+  async function handleVerify(e: { preventDefault(): void }) {
+    e.preventDefault()
+    const cleaned = cleanCode(code)
+    if (!cleaned) {
+      setCodeError('Enter the code from the email, digits only.')
+      return
+    }
+    setVerifying(true)
+    setCodeError('')
+    const supabase = createClient()
+    // Verified here, in the tab that asked for it: nothing has to cross between browsers
+    const { error } = await supabase.auth.verifyOtp({ email, token: cleaned, type: 'email' })
+    if (error) {
+      setCodeError('That code did not work. Check it, or request a new one.')
+      setVerifying(false)
+      return
+    }
+    // Full load so the server sees the new session
+    window.location.assign('/today')
+  }
+
   if (sent) {
     return (
-      <div className="text-center text-white px-6">
-        <div className="text-4xl mb-4">✉️</div>
+      <form onSubmit={handleVerify} className="w-full max-w-sm px-6 text-white" noValidate>
         <h1 className="text-2xl font-bold mb-2">Check your email</h1>
-        <p className="text-gray-400 mb-6">Magic link sent to {email}</p>
+        <p className="text-gray-400 mb-6 text-sm">
+          We sent a sign-in code to {email}. Type it here.
+        </p>
+        <input
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          value={code}
+          onChange={e => { setCode(e.target.value); if (codeError) setCodeError('') }}
+          placeholder="Code"
+          aria-label="Sign-in code"
+          autoFocus
+          className="w-full px-4 py-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:outline-none mb-4 text-2xl tracking-widest text-center tabular-nums"
+        />
+        {codeError && (
+          <p role="alert" className="text-red-400 text-sm mb-4">{codeError}</p>
+        )}
+        <button
+          type="submit"
+          disabled={verifying}
+          className="w-full py-3 rounded-xl bg-blue-600 active:bg-blue-700 text-white font-semibold text-lg disabled:opacity-50 transition-colors"
+        >
+          {verifying ? 'Signing in…' : 'Sign in'}
+        </button>
+        <p className="text-gray-600 text-xs mt-4">
+          The link in the email also works if you open it in this same browser.
+        </p>
         <button
           type="button"
-          onClick={() => { setSent(false); setEmail('') }}
-          className="text-sm text-gray-500 underline"
+          onClick={() => { setSent(false); setEmail(''); setCode(''); setCodeError('') }}
+          className="text-sm text-gray-500 underline mt-4"
         >
           Use a different email
         </button>
-      </div>
+      </form>
     )
   }
 
@@ -71,7 +125,21 @@ function AuthForm() {
         disabled={loading}
         className="w-full py-3 rounded-xl bg-blue-600 active:bg-blue-700 text-white font-semibold text-lg disabled:opacity-50 transition-colors"
       >
-        {loading ? 'Sending…' : 'Send magic link'}
+        {loading ? 'Sending…' : 'Email me a sign-in code'}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          if (!email.trim()) {
+            setError('Enter your email first.')
+            return
+          }
+          setError('')
+          setSent(true)
+        }}
+        className="w-full mt-3 py-2 text-sm text-gray-500 active:text-gray-300"
+      >
+        I already have a code
       </button>
     </form>
   )
