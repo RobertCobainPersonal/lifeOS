@@ -40,4 +40,84 @@ export interface Settings {
   slipping_days: number
   clickup_token_set: boolean
   last_planned_date: string | null
+  journal_prompts: string[]
+  default_kcal: number
+  default_protein: number
+}
+
+export type Category =
+  | 'deep_work'
+  | 'meetings'
+  | 'admin'
+  | 'reactive'
+  | 'procrastinating'
+  | 'personal_project'
+  | 'learning'
+  | 'rest'
+  | 'exercise'
+
+export interface DayLog {
+  day: string
+  one_thing_task_id: string | null
+  one_thing_clickup_id: string | null
+  kcal_target: number | null
+  protein_target: number | null
+  closeout: { prompts: string[]; answers: string[] } | null
+  closed_at: string | null
+}
+
+export interface TimeEntry {
+  id: string
+  day: string
+  mode: 'focus' | 'track'
+  category: Category
+  energy: number | null
+  task_id: string | null
+  clickup_id: string | null
+  label: string | null
+  planned_minutes: number | null
+  started_at: string
+  ended_at: string | null
+  paused_at: string | null
+  paused_seconds: number
+  distractions: number
+  done_note: string | null
+  next_note: string | null
+}
+
+export interface SavedMeal {
+  id: string
+  name: string
+  kcal: number
+  protein_g: number
+  use_count: number
+}
+
+export interface FoodEntry {
+  id: string
+  day: string
+  label: string
+  kcal: number
+  protein_g: number
+  meal_id: string | null
+  created_at: string
+}
+
+export interface Activity {
+  source: string
+  source_id: string
+  started_at: string
+  day: string
+  type: string | null
+  distance_m: number | null
+  moving_seconds: number | null
+  avg_hr: number | null
+  kcal: number | null
+}
+
+export interface DailyHealth {
+  day: string
+  sleep_minutes: number | null
+  resting_hr: number | null
+  hrv: number | null
 }
