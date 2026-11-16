@@ -8,7 +8,8 @@ interface PlanTask {
   title: string
   energy: string | null
   domain: string | null
-  category: 'yesterday' | 'deferred' | 'due_today' | 'slipping' | 'tomorrow_pick'
+  category: 'yesterday' | 'deferred' | 'due_today' | 'slipping' | 'tomorrow_pick' | 'project'
+  projectName?: string | null
 }
 
 interface WorkTask {
@@ -27,6 +28,7 @@ interface MorningPlanProps {
 const GROUPS: { key: PlanTask['category']; label: string }[] = [
   { key: 'tomorrow_pick', label: 'Chosen last night' },
   { key: 'yesterday', label: 'From yesterday' },
+  { key: 'project', label: 'Projects · next action' },
   { key: 'deferred', label: 'Deferred' },
   { key: 'due_today', label: 'Due today' },
   { key: 'slipping', label: 'Slipping' },
@@ -105,7 +107,7 @@ export default function MorningPlan({ tasks, workTasks = [], preselectedTaskId =
                 <PlanRow
                   key={task.id}
                   title={task.title}
-                  badge={task.energy}
+                  badge={task.projectName ?? task.energy}
                   order={selected.indexOf(`t:${task.id}`)}
                   disabled={full && !selected.includes(`t:${task.id}`)}
                   onToggle={() => toggle(`t:${task.id}`)}
