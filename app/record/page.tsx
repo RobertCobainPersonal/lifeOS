@@ -13,6 +13,7 @@ import {
   weekSummary,
 } from '@/lib/record'
 import { ENTRY_COLUMNS } from '@/lib/time-store'
+import { meetingMinutes, type CalendarEvent } from '@/lib/calendar'
 import type { TimeEntry } from '@/lib/types'
 import BottomNav from '@/components/BottomNav'
 import Heatmap from '@/components/Heatmap'
@@ -36,12 +37,17 @@ export default async function RecordPage() {
   const today = londonToday(now)
   const from28 = addDays(today, -27)
 
-  const [entriesResult, foodResult, logsResult, activitiesResult, inbox] = await Promise.all([
+  const [entriesResult, foodResult, logsResult, activitiesResult, inbox, calendarResult] = await Promise.all([
     supabase.from('time_entries').select(ENTRY_COLUMNS).gte('day', addDays(from28, -1)).lte('day', today),
     supabase.from('food_entries').select('day').gte('day', addDays(today, -13)).lte('day', today),
     supabase.from('day_log').select('day, closed_at').gte('day', addDays(today, -13)).lte('day', today),
     supabase.from('activities').select('day').gte('day', addDays(from28, -1)).lte('day', today),
     supabase.from('captures').select('*', { count: 'exact', head: true }).is('triaged_at', null),
+    supabase
+      .from('calendar_events')
+      .select('source, source_id, day, starts_at, ends_at, all_day, title, location, calendar')
+      .gte('day', addDays(today, -6))
+      .lte('day', today),
   ])
 
   const entries = (entriesResult.data ?? []) as TimeEntry[]
@@ -55,6 +61,7 @@ export default async function RecordPage() {
   const last28 = range(from28, 28)
 
   const current = weekSummary({ days: thisWeek, entries, food, logs, now })
+  const calendarMinutes = meetingMinutes((calendarResult.data ?? []) as CalendarEvent[], thisWeek)
   const previous = weekSummary({ days: lastWeek, entries, food, logs, now })
 
   const recent = entries.filter(e => last14.includes(e.day))
@@ -83,6 +90,11 @@ export default async function RecordPage() {
                 {line}
               </p>
             ))}
+            {calendarMinutes > 0 && (
+              <p className="text-ink-soft text-sm leading-relaxed">
+                Your calendar had {formatMinutes(calendarMinutes)} of meetings.
+              </p>
+            )}
           </div>
         </section>
 

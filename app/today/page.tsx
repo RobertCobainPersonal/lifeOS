@@ -7,6 +7,8 @@ import { resolveOneThing } from '@/lib/onething'
 import { getOpenEntry } from '@/lib/time-store'
 import { focusHref } from '@/lib/time'
 import { isLoose, planCandidates, type ProjectTask } from '@/lib/projects'
+import { freeGaps, nextEvent, type CalendarEvent } from '@/lib/calendar'
+import CalendarLine from '@/components/CalendarLine'
 import NowRow from '@/components/NowRow'
 import FuelLine from '@/components/FuelLine'
 import { dayTotals } from '@/lib/fuel'
@@ -51,6 +53,7 @@ export default async function TodayPage() {
     foodResult,
     activityResult,
     projectsResult,
+    calendarResult,
   ] = await Promise.all([
     supabase
       .from('tasks')
@@ -96,11 +99,23 @@ export default async function TodayPage() {
       .limit(1),
 
     supabase.from('projects').select('id, name, is_focus, archived'),
+
+    supabase
+      .from('calendar_events')
+      .select('source, source_id, day, starts_at, ends_at, all_day, title, location, calendar')
+      .eq('day', today)
+      .order('starts_at'),
   ])
 
   const allOpen = allOpenResult.data ?? []
   const fuel = dayTotals(foodResult.data ?? [])
   const latestActivity = activityResult.data?.[0] ?? null
+
+  // Today's calendar, as sent from the phone
+  const calendar = (calendarResult.data ?? []) as CalendarEvent[]
+  const upcoming = nextEvent(calendar, now)
+  const timedLeft = calendar.filter(e => !e.all_day && new Date(e.ends_at) > now).length
+  const gaps = freeGaps(calendar, today, now)
   const inboxCount = inboxResult.count ?? 0
   const clickupTop3 = clickupTop3Result.data ?? []
   const clickupDueToday = clickupDueTodayResult.data ?? []
@@ -205,6 +220,8 @@ export default async function TodayPage() {
         <MorningPlan
           tasks={morningPlanTasks}
           workTasks={clickupDueToday}
+          meetings={calendar}
+          gaps={gaps}
           preselectedTaskId={dayLog.one_thing_task_id}
         />
       )}
@@ -228,6 +245,16 @@ export default async function TodayPage() {
         </div>
 
         <NowRow entry={openEntry} serverNowMs={now.getTime()} />
+
+        {calendar.length > 0 && (
+          <CalendarLine
+            next={upcoming}
+            inProgress={upcoming !== null && new Date(upcoming.starts_at) <= now}
+            allDay={calendar.filter(e => e.all_day)}
+            gaps={gaps}
+            remaining={timedLeft}
+          />
+        )}
 
         <OneThingCard
           oneThing={oneThing}

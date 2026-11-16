@@ -2,7 +2,7 @@
 
 **Status:** DRAFT. The endpoints are built and unit-tested. None of the Shortcut steps below have been run on a device.
 
-All three endpoints use the same bearer token as the existing capture Shortcut (`CAPTURE_API_TOKEN`).
+All four endpoints use the same bearer token as the existing capture Shortcut (`CAPTURE_API_TOKEN`).
 
 | Header | Value |
 |--------|-------|
@@ -105,6 +105,62 @@ For your own quick-capture Shortcuts.
 
 ---
 
-## 3. Capture — `POST /api/capture`
+## 3. Calendar — `POST /api/calendar`
+
+Send today's events each morning. Whatever you send **replaces** what is stored for the days covered, so a cancelled meeting disappears on the next run. Sending twice is safe.
+
+### Request body
+
+```json
+{
+  "from": "2026-11-17",
+  "to": "2026-11-17",
+  "events": [
+    {
+      "title": "Team stand-up",
+      "start": "2026-11-17T09:30:00Z",
+      "end": "2026-11-17T10:00:00Z",
+      "location": "Room 2",
+      "calendar": "Work",
+      "all_day": false
+    }
+  ]
+}
+```
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `from` | Yes | `YYYY-MM-DD`. First day covered. |
+| `to` | No | Last day covered; defaults to `from`. At most 14 days. |
+| `events` | No | A list, or a single object. An empty list clears the days. |
+| `events[].title` | Yes, per event | An event without a title is skipped. |
+| `events[].start` | Yes, per event | ISO date and time. Events outside `from` to `to` are skipped. |
+| `events[].end` | No | Defaults to the start. |
+| `events[].location`, `calendar`, `id` | No | |
+| `events[].all_day` | No | `true`, `"Yes"` or `1`. All-day entries are listed but do not block free time. |
+
+Only title, times, location and calendar name are stored. Notes, attendees and links are not read.
+
+### Response
+
+- `200` `{ "events": 4, "from": "2026-11-17", "to": "2026-11-17" }`
+- `400` `{ "error": "..." }`
+- `401` wrong or missing token
+
+### Shortcut outline
+
+1. Personal automation: Time of Day, 07:00, daily, run without asking.
+2. Format the current date as `yyyy-MM-dd` for `from`.
+3. Find Calendar Events where Start Date is today (choose the calendars to include).
+4. Repeat with each event: build a dictionary with `title`, `start` and `end` (Format Date, ISO 8601, include time), `location`, `calendar` and `all_day`.
+5. Build the outer dictionary and send it with Get Contents of URL (POST, JSON, headers as in the table).
+
+To cover the week ahead, find events between today and six days from now and set `to` accordingly.
+
+`[TO COMPLETE: Rob to build and test on his phone, then record the working steps here. The exact action names and how Shortcuts reports all-day events need checking on the device.]`
+
+---
+
+## 4. Capture — `POST /api/capture`
 
 Unchanged. See `docs/superpowers/session-2-deploy-checklist.md`.
