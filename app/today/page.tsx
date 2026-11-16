@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { addDays, londonToday } from '@/lib/dates'
+import { addDays, londonHour, londonToday } from '@/lib/dates'
 import { getOrCreateDayLog } from '@/lib/daylog'
 import { resolveOneThing } from '@/lib/onething'
 import { getOpenEntry } from '@/lib/time-store'
@@ -230,6 +230,24 @@ export default async function TodayPage() {
           <section className="mb-6">
             <AdminBatch tasks={adminBatch} />
           </section>
+        )}
+
+        {dayLog.closed_at ? (
+          <Link
+            href="/today/close"
+            className="mb-4 block text-center text-gray-500 text-sm py-3 active:text-gray-300"
+          >
+            Day closed ✓
+          </Link>
+        ) : (
+          londonHour(now) >= 16 && (
+            <Link
+              href="/today/close"
+              className="mb-4 block text-center bg-gray-900 active:bg-gray-800 rounded-xl py-3.5 text-white font-medium"
+            >
+              Close the day
+            </Link>
+          )
         )}
 
         <ResetMyDay top3Tasks={resetTop3} dueTodayTasks={resetDueToday} />

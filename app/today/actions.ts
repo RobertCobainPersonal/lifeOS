@@ -1,6 +1,7 @@
 'use server'
 
-import { londonToday } from '@/lib/dates'
+import { addDays, londonToday } from '@/lib/dates'
+import { DEFAULT_PROMPTS } from '@/lib/closeout'
 import { createClient } from '@/lib/supabase/server'
 import { getOrCreateDayLog } from '@/lib/daylog'
 import { revalidatePath } from 'next/cache'
@@ -154,4 +155,44 @@ export async function setOneThing(
   }
 
   revalidatePath('/today')
+}
+
+export async function saveCloseout(answers: string[], tomorrowTaskId: string | null) {
+  const supabase = await createClient()
+  const today = londonToday()
+  await getOrCreateDayLog(supabase, today)
+
+  const { data: settings } = await supabase
+    .from('settings')
+    .select('journal_prompts')
+    .eq('id', 1)
+    .single()
+  const prompts: string[] = Array.isArray(settings?.journal_prompts)
+    ? settings.journal_prompts
+    : DEFAULT_PROMPTS
+
+  const { error } = await supabase
+    .from('day_log')
+    .update({
+      closeout: {
+        prompts,
+        answers: prompts.map((_, i) => (answers[i] ?? '').trim().slice(0, 2000)),
+      },
+      closed_at: new Date().toISOString(),
+    })
+    .eq('day', today)
+  if (error) throw new Error(error.message)
+
+  if (tomorrowTaskId) {
+    const tomorrow = addDays(today, 1)
+    await getOrCreateDayLog(supabase, tomorrow)
+    const { error: tomorrowError } = await supabase
+      .from('day_log')
+      .update({ one_thing_task_id: tomorrowTaskId, one_thing_clickup_id: null })
+      .eq('day', tomorrow)
+    if (tomorrowError) throw new Error(tomorrowError.message)
+  }
+
+  revalidatePath('/today')
+  revalidatePath('/today/close')
 }
