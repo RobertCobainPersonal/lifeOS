@@ -6,6 +6,8 @@ import { getOrCreateDayLog } from '@/lib/daylog'
 import { resolveOneThing } from '@/lib/onething'
 import { getOpenEntry } from '@/lib/time-store'
 import NowRow from '@/components/NowRow'
+import FuelLine from '@/components/FuelLine'
+import { dayTotals } from '@/lib/fuel'
 import QuickAdd from '@/components/QuickAdd'
 import BottomNav from '@/components/BottomNav'
 import OneThingCard, { type OneThingOption } from '@/components/OneThingCard'
@@ -43,6 +45,7 @@ export default async function TodayPage() {
     yesterdayTop3Result,
     clickupTop3Result,
     clickupDueTodayResult,
+    foodResult,
   ] = await Promise.all([
     supabase
       .from('tasks')
@@ -75,9 +78,12 @@ export default async function TodayPage() {
       .from('clickup_tasks')
       .select('clickup_id, title, list_name')
       .eq('due_date', today),
+
+    supabase.from('food_entries').select('kcal, protein_g').eq('day', today),
   ])
 
   const allOpen = allOpenResult.data ?? []
+  const fuel = dayTotals(foodResult.data ?? [])
   const inboxCount = inboxResult.count ?? 0
   const clickupTop3 = clickupTop3Result.data ?? []
   const clickupDueToday = clickupDueTodayResult.data ?? []
@@ -225,6 +231,13 @@ export default async function TodayPage() {
             </div>
           )}
         </section>
+
+        <FuelLine
+          kcal={fuel.kcal}
+          protein={fuel.protein_g}
+          kcalTarget={dayLog.kcal_target}
+          proteinTarget={dayLog.protein_target}
+        />
 
         {adminBatch.length > 0 && (
           <section className="mb-6">

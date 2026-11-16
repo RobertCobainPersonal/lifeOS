@@ -5,6 +5,7 @@ import { addDays, londonDayStartIso, londonToday } from '@/lib/dates'
 import { getOrCreateDayLog } from '@/lib/daylog'
 import { DEFAULT_PROMPTS, summariseEntries } from '@/lib/closeout'
 import { CATEGORIES } from '@/lib/time'
+import { dayTotals } from '@/lib/fuel'
 import { ENTRY_COLUMNS } from '@/lib/time-store'
 import type { Category, TimeEntry } from '@/lib/types'
 import CloseoutForm from '@/components/CloseoutForm'
@@ -26,7 +27,7 @@ export default async function ClosePage() {
   const today = londonToday(now)
   const tomorrow = addDays(today, 1)
 
-  const [dayLog, settings, entriesResult, openTasks, doneToday, tomorrowLog] = await Promise.all([
+  const [dayLog, settings, entriesResult, openTasks, doneToday, tomorrowLog, food] = await Promise.all([
     getOrCreateDayLog(supabase, today),
     supabase.from('settings').select('journal_prompts').eq('id', 1).single(),
     supabase.from('time_entries').select(ENTRY_COLUMNS).eq('day', today),
@@ -41,7 +42,10 @@ export default async function ClosePage() {
       .eq('status', 'done')
       .gte('completed_at', londonDayStartIso(today)),
     supabase.from('day_log').select('one_thing_task_id').eq('day', tomorrow).maybeSingle(),
+    supabase.from('food_entries').select('kcal, protein_g').eq('day', today),
   ])
+  const foodEntries = food.data ?? []
+  const fuel = dayTotals(foodEntries)
 
   // A day that is already closed keeps the prompts it was answered against
   const prompts: string[] =
@@ -79,6 +83,14 @@ export default async function ClosePage() {
           {categories.length > 0 && (
             <p className="text-gray-500">
               {categories.map(([c, m]) => `${CATEGORIES[c].label} ${formatMinutes(m)}`).join(' · ')}
+            </p>
+          )}
+          {foodEntries.length > 0 && (
+            <p className="text-gray-300">
+              {fuel.kcal.toLocaleString('en-GB')}
+              {dayLog.kcal_target ? ` of ${dayLog.kcal_target.toLocaleString('en-GB')}` : ''} kcal ·{' '}
+              {fuel.protein_g}
+              {dayLog.protein_target ? ` of ${dayLog.protein_target}` : ''} g protein
             </p>
           )}
         </section>
