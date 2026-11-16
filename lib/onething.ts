@@ -19,7 +19,8 @@ export function resolveOneThing(
     const t = tasks.find(x => x.id === log.one_thing_task_id)
     if (!t) return { state: 'none' }
     return {
-      state: t.status === 'done' ? 'done' : 'open',
+      // Completed, parked or deferred: no longer today's live task
+      state: t.status === 'open' ? 'open' : 'done',
       kind: 'task',
       id: t.id,
       title: t.title,

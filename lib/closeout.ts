@@ -70,3 +70,11 @@ export function summariseEntries(entries: SummaryEntry[], now: Date): EntrySumma
 
   return { focusMinutes: Math.round(focusSeconds / 60), focusSessions, distractions, minutesByCategory }
 }
+
+/** Whether saving the close-out should change tomorrow's one thing, and to what. */
+export function tomorrowChange(
+  pick: string | null,
+  existing: string | null
+): { write: boolean; taskId: string | null } {
+  return { write: pick !== existing, taskId: pick }
+}

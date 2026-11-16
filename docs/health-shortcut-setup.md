@@ -13,7 +13,7 @@ All three endpoints use the same bearer token as the existing capture Shortcut (
 
 ## 1. Daily Apple Health data — `POST /api/health`
 
-Send once a day. Sending twice is safe: the same day and the same workout overwrite rather than duplicate.
+Send once a day. Sending twice is safe: the same day and the same workout update rather than duplicate, and a figure missing from a later send leaves the stored one in place.
 
 ### Request body
 

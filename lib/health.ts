@@ -90,3 +90,8 @@ export function describeActivity(
       : null
   return [a.type ?? 'Workout', amount, when].filter(Boolean).join(' ')
 }
+
+/** Drop null fields so an upsert leaves stored values alone when a figure is missing. */
+export function withoutNulls<T extends Record<string, unknown>>(row: T): Partial<T> {
+  return Object.fromEntries(Object.entries(row).filter(([, v]) => v !== null)) as Partial<T>
+}

@@ -183,3 +183,27 @@ describe('endFields', () => {
     expect(endFields(e, new Date('2026-11-17T09:00:00Z')).ended_at).toBe('2026-11-16T13:00:00.000Z')
   })
 })
+
+import { focusHref, isOverrun } from './time'
+
+describe('focusHref', () => {
+  it('links a local task to the focus form', () => {
+    expect(focusHref('task', 'abc-1')).toBe('/time?task=abc-1')
+  })
+  it('links a work item and escapes its id', () => {
+    expect(focusHref('clickup', '86c/2 x')).toBe('/time?clickup=86c%2F2%20x')
+  })
+})
+
+describe('isOverrun', () => {
+  const f = { ...e, mode: 'focus' as const, planned_minutes: 25 }
+  it('is false while a focus session has time left', () => {
+    expect(isOverrun(f, new Date('2026-11-16T09:10:00Z'))).toBe(false)
+  })
+  it('is true once a focus session has run out', () => {
+    expect(isOverrun(f, new Date('2026-11-17T07:00:00Z'))).toBe(true)
+  })
+  it('is never true for tracking, which has no end', () => {
+    expect(isOverrun({ ...e, mode: 'track' as const, planned_minutes: null }, new Date('2026-11-17T07:00:00Z'))).toBe(false)
+  })
+})

@@ -25,6 +25,13 @@ describe('resolveOneThing', () => {
       state: 'done', kind: 'task', id: 't2', title: 'Book physio',
     })
   })
+  it.each(['someday', 'deferred'])('is done, not open, once the task is moved to %s', status => {
+    const parked = [{ id: 't9', title: 'Parked', status }]
+    expect(resolveOneThing(log({ one_thing_task_id: 't9' }), parked, clickup)).toMatchObject({
+      state: 'done',
+      id: 't9',
+    })
+  })
   it('is none when the task no longer exists', () => {
     expect(resolveOneThing(log({ one_thing_task_id: 'gone' }), tasks, clickup)).toEqual({ state: 'none' })
   })

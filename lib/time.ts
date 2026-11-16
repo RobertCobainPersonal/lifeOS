@@ -162,3 +162,16 @@ export function endFields(
   const ended = Math.max(start, Math.min(now.getTime(), latest))
   return { ended_at: new Date(ended).toISOString(), paused_at: null, paused_seconds }
 }
+
+/** Link that opens the focus form for a task or work item. */
+export function focusHref(kind: 'task' | 'clickup', id: string): string {
+  return `/time?${kind === 'task' ? 'task' : 'clickup'}=${encodeURIComponent(id)}`
+}
+
+/** A focus session whose countdown has finished but which was never ended. */
+export function isOverrun(
+  e: Timing & Pick<TimeEntry, 'mode' | 'planned_minutes'>,
+  now: Date
+): boolean {
+  return e.mode === 'focus' && remainingSeconds(e, now) === 0
+}

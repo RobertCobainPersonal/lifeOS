@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkTargets, cleanPrompts, summariseEntries } from './closeout'
+import { checkTargets, cleanPrompts, summariseEntries, tomorrowChange } from './closeout'
 
 describe('cleanPrompts', () => {
   it('trims and drops blank prompts', () => {
@@ -67,5 +67,20 @@ describe('summariseEntries', () => {
       distractions: 0,
       minutesByCategory: {},
     })
+  })
+})
+
+describe('tomorrowChange', () => {
+  it('sets a new pick', () => {
+    expect(tomorrowChange('t1', null)).toEqual({ write: true, taskId: 't1' })
+  })
+  it('clears an earlier pick when set back to deciding in the morning', () => {
+    expect(tomorrowChange(null, 't1')).toEqual({ write: true, taskId: null })
+  })
+  it('does nothing when there was no pick and still is none', () => {
+    expect(tomorrowChange(null, null)).toEqual({ write: false, taskId: null })
+  })
+  it('does nothing when the pick is unchanged', () => {
+    expect(tomorrowChange('t1', 't1')).toEqual({ write: false, taskId: 't1' })
   })
 })

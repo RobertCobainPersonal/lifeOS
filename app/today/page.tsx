@@ -5,6 +5,7 @@ import { addDays, londonHour, londonToday } from '@/lib/dates'
 import { getOrCreateDayLog } from '@/lib/daylog'
 import { resolveOneThing } from '@/lib/onething'
 import { getOpenEntry } from '@/lib/time-store'
+import { focusHref } from '@/lib/time'
 import NowRow from '@/components/NowRow'
 import FuelLine from '@/components/FuelLine'
 import { dayTotals } from '@/lib/fuel'
@@ -120,6 +121,8 @@ export default async function TodayPage() {
   const restTop3Tasks = top3Tasks.filter(t => !isOneThing('task', t.id))
   const restClickupTop3 = clickupTop3.filter(t => !isOneThing('clickup', t.clickup_id))
   const restCount = restTop3Tasks.length + restClickupTop3.length
+  // Focus can start from the one thing or any Top 3 item, unless a session is already running
+  const canFocus = openEntry?.mode !== 'focus'
 
   // Admin batch: open admin tasks, due today or undated, not in today's top3
   const adminBatch = allOpen
@@ -204,9 +207,7 @@ export default async function TodayPage() {
           oneThing={oneThing}
           options={oneThingOptions}
           focusHref={
-            oneThing.state === 'open' && openEntry?.mode !== 'focus'
-              ? `/time?${oneThing.kind === 'task' ? 'task' : 'clickup'}=${encodeURIComponent(oneThing.id)}`
-              : null
+            oneThing.state === 'open' && canFocus ? focusHref(oneThing.kind, oneThing.id) : null
           }
         />
 
@@ -230,6 +231,7 @@ export default async function TodayPage() {
                   title={task.title}
                   energy={task.energy}
                   dueDate={task.due_date}
+                  focusHref={canFocus ? focusHref('task', task.id) : null}
                 />
               ))}
               {restClickupTop3.map(task => (
@@ -241,6 +243,7 @@ export default async function TodayPage() {
                   dueDate={task.due_date}
                   url={task.url}
                   listName={task.list_name}
+                  focusHref={canFocus ? focusHref('clickup', task.clickup_id) : null}
                 />
               ))}
             </div>

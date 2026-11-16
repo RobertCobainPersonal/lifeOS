@@ -1,7 +1,7 @@
 'use server'
 
 import { addDays, londonToday } from '@/lib/dates'
-import { DEFAULT_PROMPTS } from '@/lib/closeout'
+import { DEFAULT_PROMPTS, tomorrowChange } from '@/lib/closeout'
 import { createClient } from '@/lib/supabase/server'
 import { getOrCreateDayLog } from '@/lib/daylog'
 import { revalidatePath } from 'next/cache'
@@ -183,12 +183,18 @@ export async function saveCloseout(answers: string[], tomorrowTaskId: string | n
     .eq('day', today)
   if (error) throw new Error(error.message)
 
-  if (tomorrowTaskId) {
-    const tomorrow = addDays(today, 1)
+  const tomorrow = addDays(today, 1)
+  const { data: tomorrowLog } = await supabase
+    .from('day_log')
+    .select('one_thing_task_id')
+    .eq('day', tomorrow)
+    .maybeSingle()
+  const change = tomorrowChange(tomorrowTaskId, tomorrowLog?.one_thing_task_id ?? null)
+  if (change.write) {
     await getOrCreateDayLog(supabase, tomorrow)
     const { error: tomorrowError } = await supabase
       .from('day_log')
-      .update({ one_thing_task_id: tomorrowTaskId, one_thing_clickup_id: null })
+      .update({ one_thing_task_id: change.taskId, one_thing_clickup_id: null })
       .eq('day', tomorrow)
     if (tomorrowError) throw new Error(tomorrowError.message)
   }

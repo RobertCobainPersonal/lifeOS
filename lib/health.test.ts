@@ -115,3 +115,18 @@ describe('describeActivity', () => {
     ).toBe('Workout today')
   })
 })
+
+import { withoutNulls } from './health'
+
+describe('withoutNulls', () => {
+  it('drops missing figures so a later partial send cannot erase stored ones', () => {
+    const result = parseHealthPayload({ day: '2026-11-15', sleep_minutes: 400 })
+    expect(result.ok && result.health && withoutNulls(result.health)).toEqual({
+      day: '2026-11-15',
+      sleep_minutes: 400,
+    })
+  })
+  it('keeps zero, which is a real value', () => {
+    expect(withoutNulls({ a: 0, b: null, c: 'x' })).toEqual({ a: 0, c: 'x' })
+  })
+})

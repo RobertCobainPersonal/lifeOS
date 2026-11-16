@@ -2,6 +2,7 @@
 
 import { londonToday } from '@/lib/dates'
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { completeTask, removeFromTop3 } from '@/app/tasks/actions'
 
 interface Top3ItemProps {
@@ -9,9 +10,11 @@ interface Top3ItemProps {
   title: string
   energy: string | null
   dueDate: string | null
+  /** Opens the focus form for this task; omitted while a session is running. */
+  focusHref?: string | null
 }
 
-export default function Top3Item({ id, title, energy, dueDate }: Top3ItemProps) {
+export default function Top3Item({ id, title, energy, dueDate, focusHref }: Top3ItemProps) {
   const [done, setDone] = useState(false)
   const [removed, setRemoved] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -70,6 +73,15 @@ export default function Top3Item({ id, title, energy, dueDate }: Top3ItemProps) 
           )}
         </div>
       </div>
+      {focusHref && (
+        <Link
+          href={focusHref}
+          className="shrink-0 px-2.5 py-1 text-xs font-medium text-blue-300 bg-blue-600/15 active:bg-blue-600/30 rounded-lg"
+          aria-label={`Start focus on "${title}"`}
+        >
+          Focus
+        </Link>
+      )}
       <button
         onClick={handleRemove}
         disabled={isPending}
