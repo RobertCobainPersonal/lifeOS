@@ -92,6 +92,6 @@ export function describeActivity(
 }
 
 /** Drop null fields so an upsert leaves stored values alone when a figure is missing. */
-export function withoutNulls<T extends Record<string, unknown>>(row: T): Partial<T> {
+export function withoutNulls<T extends object>(row: T): Partial<T> {
   return Object.fromEntries(Object.entries(row).filter(([, v]) => v !== null)) as Partial<T>
 }
