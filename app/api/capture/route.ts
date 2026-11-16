@@ -1,22 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-import { timingSafeEqual } from 'crypto'
-
-function verifyToken(provided: string, expected: string): boolean {
-  const a = Buffer.from(provided)
-  const b = Buffer.from(expected)
-  const len = Math.max(a.length, b.length)
-  const aPadded = Buffer.concat([a, Buffer.alloc(len - a.length)])
-  const bPadded = Buffer.concat([b, Buffer.alloc(len - b.length)])
-  return timingSafeEqual(aPadded, bPadded) && a.length === b.length
-}
+import { verifyBearer } from '@/lib/api-auth'
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get('authorization') ?? ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
-  const expected = process.env.CAPTURE_API_TOKEN ?? ''
-
-  if (!token || !expected || !verifyToken(token, expected)) {
+  if (!verifyBearer(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

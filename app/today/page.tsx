@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { addDays, londonToday } from '@/lib/dates'
 import { getOrCreateDayLog } from '@/lib/daylog'
 import { resolveOneThing } from '@/lib/onething'
+import { getOpenEntry } from '@/lib/time-store'
+import NowRow from '@/components/NowRow'
 import QuickAdd from '@/components/QuickAdd'
 import BottomNav from '@/components/BottomNav'
 import OneThingCard, { type OneThingOption } from '@/components/OneThingCard'
@@ -24,9 +26,10 @@ export default async function TodayPage() {
   const today = londonToday(now)
   const yesterday = addDays(today, -1)
 
-  const [settingsResult, dayLog] = await Promise.all([
+  const [settingsResult, dayLog, openEntry] = await Promise.all([
     supabase.from('settings').select('last_planned_date, slipping_days').eq('id', 1).single(),
     getOrCreateDayLog(supabase, today),
+    getOpenEntry(supabase),
   ])
   const settings = settingsResult.data
   const slippingThreshold = new Date(
@@ -174,7 +177,17 @@ export default async function TodayPage() {
           </Link>
         </div>
 
-        <OneThingCard oneThing={oneThing} options={oneThingOptions} />
+        <NowRow entry={openEntry} serverNowMs={now.getTime()} />
+
+        <OneThingCard
+          oneThing={oneThing}
+          options={oneThingOptions}
+          focusHref={
+            oneThing.state === 'open' && openEntry?.mode !== 'focus'
+              ? `/time?${oneThing.kind === 'task' ? 'task' : 'clickup'}=${encodeURIComponent(oneThing.id)}`
+              : null
+          }
+        />
 
         <section className="mb-6">
           <div className="flex items-baseline justify-between mb-2 px-1">
