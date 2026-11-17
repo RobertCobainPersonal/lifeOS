@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
+import { isOn } from '@/lib/features'
 
 export default async function MorePage() {
   const supabase = await createClient()
@@ -10,7 +11,7 @@ export default async function MorePage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
 
-  const settings = await supabase.from('settings').select('slipping_days').eq('id', 1).single()
+  const settings = await supabase.from('settings').select('slipping_days, features').eq('id', 1).single()
   const now = new Date()
   const threshold = new Date(now.getTime() - (settings.data?.slipping_days ?? 5) * 86_400_000)
 
@@ -32,6 +33,8 @@ export default async function MorePage() {
     { href: '/slipping', label: 'Slipping', note: slippingCount > 0 ? String(slippingCount) : undefined },
     { href: '/time', label: 'Track time' },
     { href: '/record', label: 'Record' },
+    ...(isOn(settings.data?.features, 'weekly_review') ? [{ href: '/review', label: 'Weekly review' }] : []),
+    ...(isOn(settings.data?.features, 'week_ahead') ? [{ href: '/week', label: 'Week ahead' }] : []),
     { href: '/settings', label: 'Settings' },
   ]
 

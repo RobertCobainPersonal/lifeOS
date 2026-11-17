@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { stopEntry } from '@/app/time/actions'
 import { CATEGORIES, elapsedSeconds, formatClock } from '@/lib/time'
 import type { TimeEntry } from '@/lib/types'
@@ -8,7 +8,19 @@ import { useNow } from '@/components/useNow'
 
 export default function TrackRunning({ entry, serverNowMs }: { entry: TimeEntry; serverNowMs: number }) {
   const now = useNow(serverNowMs)
+  const [failed, setFailed] = useState(false)
   const [isPending, startTransition] = useTransition()
+
+  function stop() {
+    setFailed(false)
+    startTransition(async () => {
+      try {
+        await stopEntry()
+      } catch {
+        setFailed(true)
+      }
+    })
+  }
 
   return (
     <div className="bg-card ring-1 ring-line rounded-xl p-4 flex items-center gap-3">
@@ -21,9 +33,14 @@ export default function TrackRunning({ entry, serverNowMs }: { entry: TimeEntry;
         <p className="text-2xl font-bold tabular-nums mt-1" role="timer">
           {formatClock(elapsedSeconds(entry, now))}
         </p>
+        {failed && (
+          <p role="alert" className="text-red-700 text-xs mt-1">
+            Could not stop — try again
+          </p>
+        )}
       </div>
       <button
-        onClick={() => startTransition(() => stopEntry())}
+        onClick={stop}
         disabled={isPending}
         className="shrink-0 px-5 py-3 bg-accent active:bg-accent-strong text-white font-semibold rounded-xl disabled:opacity-40"
       >

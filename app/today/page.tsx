@@ -9,6 +9,9 @@ import { focusHref } from '@/lib/time'
 import { isLoose, planCandidates, type ProjectTask } from '@/lib/projects'
 import { freeGaps, nextEvent, type CalendarEvent } from '@/lib/calendar'
 import CalendarLine from '@/components/CalendarLine'
+import { isOn, reviewDue } from '@/lib/features'
+import { sleepLabel } from '@/lib/health'
+import NonNegotiables from '@/components/NonNegotiables'
 import NowRow from '@/components/NowRow'
 import FuelLine from '@/components/FuelLine'
 import { dayTotals } from '@/lib/fuel'
@@ -34,7 +37,11 @@ export default async function TodayPage() {
   const yesterday = addDays(today, -1)
 
   const [settingsResult, dayLog, openEntry] = await Promise.all([
-    supabase.from('settings').select('last_planned_date, slipping_days').eq('id', 1).single(),
+    supabase
+      .from('settings')
+      .select('last_planned_date, slipping_days, features, last_review_date')
+      .eq('id', 1)
+      .single(),
     getOrCreateDayLog(supabase, today),
     getOpenEntry(supabase),
   ])
@@ -54,6 +61,9 @@ export default async function TodayPage() {
     activityResult,
     projectsResult,
     calendarResult,
+    habitsResult,
+    ticksResult,
+    sleepResult,
   ] = await Promise.all([
     supabase
       .from('tasks')
@@ -105,11 +115,35 @@ export default async function TodayPage() {
       .select('source, source_id, day, starts_at, ends_at, all_day, title, location, calendar')
       .eq('day', today)
       .order('starts_at'),
+
+    // Optional features: each query is skipped while its switch is off
+    isOn(settings?.features, 'non_negotiables')
+      ? supabase.from('habits').select('id, name').eq('archived', false).order('sort')
+      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+    isOn(settings?.features, 'non_negotiables')
+      ? supabase.from('habit_ticks').select('habit_id').eq('day', today)
+      : Promise.resolve({ data: [] as { habit_id: string }[] }),
+    isOn(settings?.features, 'sleep_line')
+      ? supabase
+          .from('daily_health')
+          .select('day, sleep_minutes')
+          .gte('day', addDays(today, -1))
+          .not('sleep_minutes', 'is', null)
+          .order('day', { ascending: false })
+          .limit(1)
+      : Promise.resolve({ data: [] as { day: string; sleep_minutes: number | null }[] }),
   ])
 
   const allOpen = allOpenResult.data ?? []
   const fuel = dayTotals(foodResult.data ?? [])
   const latestActivity = activityResult.data?.[0] ?? null
+  const tickedToday = new Set((ticksResult.data ?? []).map(t => t.habit_id))
+  const nonNegotiables = (habitsResult.data ?? []).map(h => ({
+    id: h.id,
+    name: h.name,
+    done: tickedToday.has(h.id),
+  }))
+  const lastSleep = sleepResult.data?.[0]?.sleep_minutes ?? null
 
   // Today's calendar, as sent from the phone
   const calendar = (calendarResult.data ?? []) as CalendarEvent[]
@@ -233,6 +267,7 @@ export default async function TodayPage() {
             <p className="text-muted text-sm">
               {dateLabel}
               {latestActivity ? ` · ${describeActivity(latestActivity, today)}` : ''}
+              {lastSleep !== null ? ` · Slept ${sleepLabel(lastSleep)}` : ''}
             </p>
           </div>
           <Link
@@ -303,6 +338,8 @@ export default async function TodayPage() {
           )}
         </section>
 
+        <NonNegotiables items={nonNegotiables} />
+
         <FuelLine
           kcal={fuel.kcal}
           protein={fuel.protein_g}
@@ -315,6 +352,17 @@ export default async function TodayPage() {
             <AdminBatch tasks={adminBatch} />
           </section>
         )}
+
+        {isOn(settings?.features, 'weekly_review') &&
+          reviewDue(settings?.last_review_date ?? null, today) && (
+            <Link
+              href="/review"
+              className="mb-4 flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-3 active:bg-sunk"
+            >
+              <span className="text-ink-soft text-sm font-medium">Weekly review</span>
+              <span className="text-faint text-sm">→</span>
+            </Link>
+          )}
 
         {dayLog.closed_at ? (
           <Link

@@ -4,17 +4,19 @@ import { useState, useTransition } from 'react'
 import { addFood } from '@/app/fuel/actions'
 import { parseFoodInput } from '@/lib/fuel'
 
-export default function FoodEntryForm() {
+export default function FoodEntryForm({ detailed = false }: { detailed?: boolean }) {
   const [label, setLabel] = useState('')
   const [kcal, setKcal] = useState('')
   const [protein, setProtein] = useState('')
+  const [carbs, setCarbs] = useState('')
+  const [fat, setFat] = useState('')
   const [saveAsMeal, setSaveAsMeal] = useState(false)
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
 
   function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
-    const parsed = parseFoodInput({ label, kcal, protein })
+    const parsed = parseFoodInput({ label, kcal, protein, carbs, fat })
     if (!parsed.ok) {
       setError(parsed.error)
       return
@@ -22,7 +24,7 @@ export default function FoodEntryForm() {
     setError('')
     startTransition(async () => {
       try {
-        const result = await addFood({ label, kcal, protein, saveAsMeal })
+        const result = await addFood({ label, kcal, protein, carbs, fat, saveAsMeal })
         if (result.error) {
           setError(result.error)
           return
@@ -30,6 +32,8 @@ export default function FoodEntryForm() {
         setLabel('')
         setKcal('')
         setProtein('')
+        setCarbs('')
+        setFat('')
         setSaveAsMeal(false)
       } catch {
         setError('Could not save — try again')
@@ -72,6 +76,28 @@ export default function FoodEntryForm() {
           className={`flex-1 min-w-0 ${field}`}
         />
       </div>
+      {detailed && (
+        <div className="flex gap-2">
+          <input
+            type="text"
+            inputMode="numeric"
+            value={carbs}
+            onChange={e => setCarbs(e.target.value)}
+            placeholder="carbs g"
+            aria-label="Carbohydrate in grams"
+            className={`flex-1 min-w-0 ${field}`}
+          />
+          <input
+            type="text"
+            inputMode="numeric"
+            value={fat}
+            onChange={e => setFat(e.target.value)}
+            placeholder="fat g"
+            aria-label="Fat in grams"
+            className={`flex-1 min-w-0 ${field}`}
+          />
+        </div>
+      )}
       <label className="flex items-center gap-3 py-1">
         <input
           type="checkbox"

@@ -5,7 +5,7 @@ import { deleteSavedMeal, logSavedMeal } from '@/app/fuel/actions'
 import type { SavedMeal } from '@/lib/types'
 
 /** Saved meals as large tap targets: one tap logs the meal for today. */
-export default function SavedMealList({ meals }: { meals: SavedMeal[] }) {
+export default function SavedMealList({ meals, detailed = false }: { meals: SavedMeal[]; detailed?: boolean }) {
   const [editing, setEditing] = useState(false)
   const [justLogged, setJustLogged] = useState<string | null>(null)
   const [error, setError] = useState('')
@@ -56,7 +56,9 @@ export default function SavedMealList({ meals }: { meals: SavedMeal[] }) {
             <p className="text-muted text-xs mt-0.5">
               {editing
                 ? 'Tap to remove'
-                : `${meal.kcal} kcal · ${meal.protein_g} g${justLogged === meal.id ? ' · logged ✓' : ''}`}
+                : `${meal.kcal} kcal · ${
+                    detailed ? `P${meal.protein_g} C${meal.carbs_g} F${meal.fat_g}` : `${meal.protein_g} g`
+                  }${justLogged === meal.id ? ' · logged ✓' : ''}`}
             </p>
           </button>
         ))}

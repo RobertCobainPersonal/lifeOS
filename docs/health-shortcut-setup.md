@@ -39,7 +39,7 @@ Send once a day. Sending twice is safe: the same day and the same workout update
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `day` | Yes | `YYYY-MM-DD`. The day the sleep and heart figures belong to. |
+| `day` | Yes | `YYYY-MM-DD`. Send yesterday's date with last night's sleep: a sleep figure filed under a day is compared with focus on the following day. |
 | `sleep_minutes`, `resting_hr`, `hrv` | No | Numbers, or numbers as text. Anything missing or not a number is ignored. |
 | `workouts` | No | A list, or a single object. |
 | `workouts[].start` | Yes, per workout | ISO date and time. A workout without it is skipped. |
@@ -102,6 +102,8 @@ For your own quick-capture Shortcuts.
 - `400` `{ "error": "..." }` unknown action or category, or minutes out of range
 - `401` wrong or missing token
 - `409` `{ "error": "focus_running" }` a focus session is running; end it in the app first
+- `409` `{ "error": "tracking_running" }` on `log` while something is being tracked; send `stop` first
+- `409` `{ "error": "busy" }` two starts arrived together; send it again
 
 ---
 

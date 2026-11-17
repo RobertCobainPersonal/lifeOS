@@ -61,7 +61,7 @@ export default function ClickupListGroup({
                       </span>
                     )}
                     {task.due_date && (
-                      <span className={`text-xs ${isOverdue ? 'text-red-700' : 'text-muted'}`}>
+                      <span className={`text-xs ${isOverdue ? 'text-amber-700' : 'text-muted'}`}>
                         {isOverdue ? 'overdue · ' : ''}{task.due_date}
                       </span>
                     )}

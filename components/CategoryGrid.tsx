@@ -24,7 +24,11 @@ export default function CategoryGrid({ current = null }: CategoryGridProps) {
       try {
         const result = await startTrack({ category, label, energy })
         if ('error' in result) {
-          setError('A focus session is running. End it first.')
+          setError(
+            result.error === 'focus_running'
+              ? 'A focus session is running. End it first.'
+              : 'Something else just started. Try again.'
+          )
           return
         }
         setLabel('')

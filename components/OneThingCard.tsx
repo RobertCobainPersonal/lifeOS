@@ -123,11 +123,11 @@ export default function OneThingCard({ oneThing, options, focusHref }: OneThingC
           <div className="mt-3 border-t border-line pt-2">
             {others.length === 0 ? (
               <p className="text-muted text-sm py-2">
-                Nothing in your Top 3 yet.{' '}
+                {options.length === 0 ? 'Nothing in your Top 3 yet.' : 'Nothing else is pinned.'}{' '}
                 <Link href="/tasks" className="text-accent-ink">
                   Star a task
                 </Link>{' '}
-                first.
+                to choose it here.
               </p>
             ) : (
               others.map(o => (

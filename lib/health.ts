@@ -95,3 +95,11 @@ export function describeActivity(
 export function withoutNulls<T extends object>(row: T): Partial<T> {
   return Object.fromEntries(Object.entries(row).filter(([, v]) => v !== null)) as Partial<T>
 }
+
+/** Sleep as "6h 52m". */
+export function sleepLabel(minutes: number): string {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (h === 0) return `${m}m`
+  return m === 0 ? `${h}h` : `${h}h ${m}m`
+}

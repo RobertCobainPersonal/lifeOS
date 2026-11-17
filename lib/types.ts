@@ -43,6 +43,9 @@ export interface Settings {
   journal_prompts: string[]
   default_kcal: number
   default_protein: number
+  features: Record<string, unknown> | null
+  kcal_bands: Record<string, unknown> | null
+  last_review_date: string | null
 }
 
 export type Category =
@@ -62,6 +65,7 @@ export interface DayLog {
   one_thing_clickup_id: string | null
   kcal_target: number | null
   protein_target: number | null
+  day_type?: string | null
   closeout: { prompts: string[]; answers: string[] } | null
   closed_at: string | null
 }
@@ -90,6 +94,8 @@ export interface SavedMeal {
   name: string
   kcal: number
   protein_g: number
+  carbs_g: number
+  fat_g: number
   use_count: number
 }
 
@@ -99,6 +105,8 @@ export interface FoodEntry {
   label: string
   kcal: number
   protein_g: number
+  carbs_g: number
+  fat_g: number
   meal_id: string | null
   created_at: string
 }

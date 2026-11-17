@@ -5,6 +5,11 @@ import SettingsForm from '@/components/SettingsForm'
 import JournalPromptsForm from '@/components/JournalPromptsForm'
 import TargetsForm from '@/components/TargetsForm'
 import { DEFAULT_PROMPTS } from '@/lib/closeout'
+import { FEATURES, isOn } from '@/lib/features'
+import { resolveBands } from '@/lib/fuel'
+import FeatureToggles from '@/components/FeatureToggles'
+import BandsForm from '@/components/BandsForm'
+import HabitsForm from '@/components/HabitsForm'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -15,9 +20,13 @@ export default async function SettingsPage() {
 
   const { data: settings } = await supabase
     .from('settings')
-    .select('slipping_days, clickup_token_set, journal_prompts, default_kcal, default_protein')
+    .select('slipping_days, clickup_token_set, journal_prompts, default_kcal, default_protein, features, kcal_bands')
     .eq('id', 1)
     .single()
+
+  const habits = isOn(settings?.features, 'non_negotiables')
+    ? (await supabase.from('habits').select('id, name').eq('archived', false).order('sort')).data ?? []
+    : null
 
   const slippingDays = settings?.slipping_days ?? 5
   const hasClickUp = !!process.env.CLICKUP_API_TOKEN
@@ -55,6 +64,43 @@ export default async function SettingsPage() {
             <TargetsForm
               kcal={settings?.default_kcal ?? 2400}
               protein={settings?.default_protein ?? 160}
+            />
+          </div>
+        </section>
+
+        {isOn(settings?.features, 'detailed_nutrition') && (
+          <section className="mb-8">
+            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-3 px-1">
+              Calories by day type
+            </h2>
+            <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4">
+              <p className="text-muted text-sm mb-3">
+                Choosing a day type on Fuel sets that day&rsquo;s calorie target to these.
+              </p>
+              <BandsForm bands={resolveBands(settings?.kcal_bands)} />
+            </div>
+          </section>
+        )}
+
+        {habits && (
+          <section className="mb-8">
+            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-3 px-1">
+              Non-negotiables
+            </h2>
+            <div className="bg-card ring-1 ring-line rounded-xl px-4 py-3">
+              <p className="text-muted text-sm mb-1">Shown on Home as daily ticks. Up to seven.</p>
+              <HabitsForm habits={habits} />
+            </div>
+          </section>
+        )}
+
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-3 px-1">
+            Optional features
+          </h2>
+          <div className="bg-card ring-1 ring-line rounded-xl px-4 py-1">
+            <FeatureToggles
+              enabled={FEATURES.filter(f => isOn(settings?.features, f.key)).map(f => f.key)}
             />
           </div>
         </section>

@@ -2,7 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { verifyBearer } from '@/lib/api-auth'
 import { parseTrackBody } from '@/lib/time'
-import { logBlock, startEntry, stopOpenEntry } from '@/lib/time-store'
+import { getOpenEntry, logBlock, startEntry, stopOpenEntry } from '@/lib/time-store'
 
 /** Phone Shortcuts: start a category, stop, or log a finished block. */
 export async function POST(request: Request) {
@@ -32,6 +32,14 @@ export async function POST(request: Request) {
     }
 
     if (parsed.action === 'log') {
+      // A block logged while something is running would count that time twice
+      const open = await getOpenEntry(supabase)
+      if (open) {
+        return NextResponse.json(
+          { error: open.mode === 'focus' ? 'focus_running' : 'tracking_running' },
+          { status: 409 }
+        )
+      }
       const entry = await logBlock(supabase, parsed, now)
       return NextResponse.json({ entry })
     }

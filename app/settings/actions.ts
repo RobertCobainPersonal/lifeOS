@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { checkTargets, cleanPrompts } from '@/lib/closeout'
+import { withFeature, type FeatureKey } from '@/lib/features'
+import { cleanBands, type DayType } from '@/lib/fuel'
 import { londonToday } from '@/lib/dates'
 import { getOrCreateDayLog } from '@/lib/daylog'
 
@@ -53,5 +55,31 @@ export async function updateTargets(kcal: number, protein: number) {
 
   revalidatePath('/settings')
   revalidatePath('/today')
+  revalidatePath('/fuel')
+}
+
+export async function setFeature(key: FeatureKey, on: boolean) {
+  const supabase = await createClient()
+  const { data, error: readError } = await supabase
+    .from('settings')
+    .select('features')
+    .eq('id', 1)
+    .single()
+  if (readError) throw new Error(readError.message)
+  const { error } = await supabase
+    .from('settings')
+    .update({ features: withFeature(data.features, key, on) })
+    .eq('id', 1)
+  if (error) throw new Error(error.message)
+  revalidatePath('/', 'layout')
+}
+
+export async function updateBands(input: Record<DayType, string>) {
+  const cleaned = cleanBands(input)
+  if (!cleaned.ok) throw new Error(cleaned.error)
+  const supabase = await createClient()
+  const { error } = await supabase.from('settings').update({ kcal_bands: cleaned.bands }).eq('id', 1)
+  if (error) throw new Error(error.message)
+  revalidatePath('/settings')
   revalidatePath('/fuel')
 }

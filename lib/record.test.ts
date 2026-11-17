@@ -6,6 +6,8 @@ import {
   hotSpots,
   hourGrid,
   sentences,
+  sleepSplit,
+  trackedDayCount,
   trainingSplit,
   weekSummary,
 } from './record'
@@ -210,5 +212,36 @@ describe('sentences', () => {
   })
   it('says something calm for an empty week', () => {
     expect(sentences(none, none)).toEqual(['Nothing logged this week yet.'])
+  })
+})
+
+describe('trackedDayCount', () => {
+  it('counts distinct days that have any entry', () => {
+    expect(
+      trackedDayCount([entry('2026-11-16', 9, 30), entry('2026-11-16', 11, 30), entry('2026-11-17', 9, 30)])
+    ).toBe(2)
+    expect(trackedDayCount([])).toBe(0)
+  })
+})
+
+describe('sleepSplit', () => {
+  const days = (n: number) => Array.from({ length: n }, (_, i) => addDays('2026-11-01', i))
+  // sleep recorded for each day; the following day has 60 min focus after 7h+ and 30 min after less
+  const build = (n: number) => {
+    const d = days(n)
+    const health = d.map((day, i) => ({ day, sleep_minutes: i % 2 === 0 ? 450 : 360 }))
+    const good = new Set(health.filter(h => h.sleep_minutes >= 420).map(h => h.day))
+    const entries = d.slice(1).map(day => focus(day, 9, good.has(addDays(day, -1)) ? 60 : 30))
+    return { entries, health, days: d, now }
+  }
+  it('needs fourteen days with both sleep and focus', () => {
+    expect(sleepSplit(build(14))).toBeNull() // only 13 following days
+  })
+  it('compares focus after seven hours or more with focus after less', () => {
+    expect(sleepSplit(build(15))).toEqual({ afterLonger: 60, afterShorter: 30, thresholdMinutes: 420 })
+  })
+  it('skips nights with no sleep figure', () => {
+    const input = build(15)
+    expect(sleepSplit({ ...input, health: input.health.map(h => ({ ...h, sleep_minutes: null })) })).toBeNull()
   })
 })

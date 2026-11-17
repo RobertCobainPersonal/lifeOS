@@ -27,7 +27,13 @@ export default function FocusStartForm({ label, taskId, clickupId }: FocusStartF
     startTransition(async () => {
       try {
         const result = await startFocus({ taskId, clickupId, label, plannedMinutes: minutes, energy })
-        if ('error' in result) setError('A focus session is already running.')
+        if ('error' in result) {
+          setError(
+            result.error === 'focus_running'
+              ? 'A focus session is already running.'
+              : 'Something else just started. Try again.'
+          )
+        }
       } catch {
         setError('Could not start — try again')
       }

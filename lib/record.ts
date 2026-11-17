@@ -190,3 +190,46 @@ export function sentences(current: WeekSummary, previous: WeekSummary): string[]
   }
   return out
 }
+
+/** How many distinct days have at least one time entry. */
+export function trackedDayCount(entries: Pick<TimeEntry, 'day'>[]): number {
+  return new Set(entries.map(e => e.day)).size
+}
+
+const SLEEP_THRESHOLD_MINUTES = 420
+
+/**
+ * Mean focus minutes on the day after seven hours or more of sleep versus the
+ * day after less, over days that have both a sleep figure and a focus session.
+ * A sleep figure filed under day D is taken to affect focus on D + 1.
+ */
+export function sleepSplit(input: {
+  entries: TimeEntry[]
+  health: { day: string; sleep_minutes: number | null }[]
+  days: string[]
+  now: Date
+}): { afterLonger: number; afterShorter: number; thresholdMinutes: number } | null {
+  const inRange = new Set(input.days)
+  const sleepBefore = new Map<string, number>()
+  for (const h of input.health) {
+    if (h.sleep_minutes !== null) sleepBefore.set(addDays(h.day, 1), h.sleep_minutes)
+  }
+
+  const focusByDay = new Map<string, TimeEntry[]>()
+  for (const e of input.entries) {
+    if (e.mode !== 'focus' || !inRange.has(e.day) || !sleepBefore.has(e.day)) continue
+    focusByDay.set(e.day, [...(focusByDay.get(e.day) ?? []), e])
+  }
+  if (focusByDay.size < MIN_DAYS) return null
+
+  const longer: number[] = []
+  const shorter: number[] = []
+  for (const [day, dayEntries] of focusByDay) {
+    const minutes = summariseEntries(dayEntries, input.now).focusMinutes
+    ;(sleepBefore.get(day)! >= SLEEP_THRESHOLD_MINUTES ? longer : shorter).push(minutes)
+  }
+  if (longer.length === 0 || shorter.length === 0) return null
+
+  const mean = (xs: number[]) => Math.round(xs.reduce((a, b) => a + b, 0) / xs.length)
+  return { afterLonger: mean(longer), afterShorter: mean(shorter), thresholdMinutes: SLEEP_THRESHOLD_MINUTES }
+}

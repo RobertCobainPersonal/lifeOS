@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { DayLog } from '@/lib/types'
 
 const COLUMNS =
-  'day, one_thing_task_id, one_thing_clickup_id, kcal_target, protein_target, closeout, closed_at'
+  'day, one_thing_task_id, one_thing_clickup_id, kcal_target, protein_target, day_type, closeout, closed_at'
 
 /** Fetch the log row for a day, creating it with the default targets if missing. */
 export async function getOrCreateDayLog(supabase: SupabaseClient, day: string): Promise<DayLog> {
