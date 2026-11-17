@@ -34,13 +34,14 @@ describe('withFeature', () => {
 })
 
 describe('FEATURES', () => {
-  it('lists the five optional features', () => {
+  it('lists the six optional features', () => {
     expect(FEATURES.map(f => f.key)).toEqual([
       'detailed_nutrition',
       'weekly_review',
       'non_negotiables',
       'sleep_line',
       'week_ahead',
+      'people',
     ])
   })
 })

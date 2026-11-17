@@ -27,6 +27,11 @@ export const FEATURES = [
     label: 'Week ahead',
     note: 'The next seven days of meetings and free time. Needs the Calendar Shortcut to send a week.',
   },
+  {
+    key: 'people',
+    label: 'Keeping in touch',
+    note: 'A list of people and how often you want to be in touch, with a gentle nudge on Home.',
+  },
 ] as const
 
 export type FeatureKey = (typeof FEATURES)[number]['key']
