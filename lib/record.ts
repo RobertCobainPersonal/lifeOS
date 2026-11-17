@@ -5,6 +5,8 @@ import type { Category, TimeEntry } from '@/lib/types'
 
 /** Comparisons and patterns stay hidden until there are this many days behind them. */
 export const MIN_DAYS = 14
+/** Each side of a comparison needs at least this many days. */
+export const MIN_SIDE_DAYS = 3
 export const WORK_HOURS = { start: 8, end: 18 }
 const WAKING_HOURS = { start: 6, end: 22 }
 
@@ -129,7 +131,7 @@ export function trainingSplit(input: {
     const minutes = summariseEntries(dayEntries, input.now).focusMinutes
     ;(trained.has(addDays(day, -1)) ? after : rest).push(minutes)
   }
-  if (after.length === 0 || rest.length === 0) return null
+  if (after.length < MIN_SIDE_DAYS || rest.length < MIN_SIDE_DAYS) return null
 
   const mean = (xs: number[]) => Math.round(xs.reduce((a, b) => a + b, 0) / xs.length)
   return { afterTraining: mean(after), afterRest: mean(rest) }
@@ -228,7 +230,7 @@ export function sleepSplit(input: {
     const minutes = summariseEntries(dayEntries, input.now).focusMinutes
     ;(sleepBefore.get(day)! >= SLEEP_THRESHOLD_MINUTES ? longer : shorter).push(minutes)
   }
-  if (longer.length === 0 || shorter.length === 0) return null
+  if (longer.length < MIN_SIDE_DAYS || shorter.length < MIN_SIDE_DAYS) return null
 
   const mean = (xs: number[]) => Math.round(xs.reduce((a, b) => a + b, 0) / xs.length)
   return { afterLonger: mean(longer), afterShorter: mean(shorter), thresholdMinutes: SLEEP_THRESHOLD_MINUTES }

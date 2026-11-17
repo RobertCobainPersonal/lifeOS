@@ -20,6 +20,7 @@ export type CalendarPayload =
 export const WORK_DAY = { start: 8, end: 18 }
 export const MIN_GAP_MINUTES = 25
 const MAX_RANGE_DAYS = 14
+const MAX_EVENT_DAYS = 31
 
 function isRealDay(day: unknown): day is string {
   if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return false
@@ -71,25 +72,38 @@ export function parseCalendarPayload(body: unknown): CalendarPayload {
     const start = new Date(e.start)
     if (Number.isNaN(start.getTime())) continue
 
-    const day = londonDate(start)
-    if (day < b.from || day > to) continue
-
     const endRaw = typeof e.end === 'string' ? new Date(e.end) : null
     const end = endRaw && !Number.isNaN(endRaw.getTime()) && endRaw > start ? endRaw : start
+    const allDay = truthy(e.all_day)
+    const baseId = text(e.id, 200) ?? `${start.toISOString()}|${title}`
 
-    const starts_at = start.toISOString()
-    const source_id = text(e.id, 200) ?? `${starts_at}|${title}`
-    byId.set(source_id, {
-      source: 'shortcut',
-      source_id,
-      day,
-      starts_at,
-      ends_at: end.toISOString(),
-      all_day: truthy(e.all_day),
-      title,
-      location: text(e.location, 200),
-      calendar: text(e.calendar, 80),
-    })
+    // One row per London day the event touches, each clipped to that day,
+    // so an overnight or multi-day event shows on every day it covers.
+    const firstDay = londonDate(start)
+    const lastDay = londonDate(end > start ? new Date(end.getTime() - 1) : start)
+    const days: string[] = []
+    for (let d = firstDay; d <= lastDay && days.length < MAX_EVENT_DAYS; d = addDays(d, 1)) days.push(d)
+
+    for (const day of days) {
+      if (day < b.from || day > to) continue
+      const dayStart = new Date(londonDayStartIso(day)).getTime()
+      const dayEnd = new Date(londonDayStartIso(addDays(day, 1))).getTime()
+      const segStart = Math.max(start.getTime(), dayStart)
+      const segEnd = Math.max(segStart, Math.min(end.getTime(), dayEnd))
+      const source_id = days.length > 1 ? `${baseId}|${day}` : baseId
+      byId.set(source_id, {
+        source: 'shortcut',
+        source_id,
+        day,
+        starts_at: new Date(segStart).toISOString(),
+        ends_at: new Date(segEnd).toISOString(),
+        // a part that fills the whole day blocks nothing in particular
+        all_day: allDay || (segStart === dayStart && segEnd === dayEnd),
+        title,
+        location: text(e.location, 200),
+        calendar: text(e.calendar, 80),
+      })
+    }
   }
 
   return { ok: true, from: b.from, to, events: [...byId.values()] }

@@ -25,6 +25,7 @@ export async function addFood(input: {
 
   const supabase = await createClient()
   let mealId: string | null = null
+  const macrosEntered = (input.carbs ?? '').trim() !== '' || (input.fat ?? '').trim() !== ''
 
   if (input.saveAsMeal) {
     // A meal saved under an existing name updates that meal's figures
@@ -35,8 +36,8 @@ export async function addFood(input: {
           name: parsed.label,
           kcal: parsed.kcal,
           protein_g: parsed.protein_g,
-          carbs_g: parsed.carbs_g,
-          fat_g: parsed.fat_g,
+          // only overwrite stored carbs and fat when they were actually entered
+          ...(macrosEntered ? { carbs_g: parsed.carbs_g, fat_g: parsed.fat_g } : {}),
         },
         { onConflict: 'name' }
       )

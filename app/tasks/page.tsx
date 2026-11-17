@@ -51,7 +51,20 @@ export default async function TasksPage() {
   const tasks: TaskRow[] = tasksResult.data ?? []
   const inboxCount = countResult.count ?? 0
 
-  const top3Count = tasks.filter(t => t.is_top3 && t.top3_date === today).length
+  // Count everything pinned today, including project tasks and work items not listed here
+  const [pinnedLocal, pinnedWork] = await Promise.all([
+    supabase
+      .from('tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_top3', true)
+      .eq('top3_date', today)
+      .eq('status', 'open'),
+    supabase
+      .from('clickup_tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('pinned_top3_date', today),
+  ])
+  const top3Count = (pinnedLocal.count ?? 0) + (pinnedWork.count ?? 0)
 
   const work = tasks.filter(t => t.domain === 'work')
   const personal = tasks.filter(t => t.domain === 'personal')

@@ -245,3 +245,16 @@ describe('sleepSplit', () => {
     expect(sleepSplit({ ...input, health: input.health.map(h => ({ ...h, sleep_minutes: null })) })).toBeNull()
   })
 })
+
+describe('splits need enough days on both sides', () => {
+  const days = Array.from({ length: 16 }, (_, i) => addDays('2026-11-01', i))
+  it('says nothing about training when only one day followed training', () => {
+    const entries = days.map(day => focus(day, 9, 30))
+    expect(trainingSplit({ entries, activities: [{ day: '2026-11-03' }], days, now })).toBeNull()
+  })
+  it('says nothing about sleep when only one night was short', () => {
+    const health = days.map((day, i) => ({ day, sleep_minutes: i === 3 ? 300 : 450 }))
+    const entries = days.slice(1).map(day => focus(day, 9, 30))
+    expect(sleepSplit({ entries, health, days, now })).toBeNull()
+  })
+})

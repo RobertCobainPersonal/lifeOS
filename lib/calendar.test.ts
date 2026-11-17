@@ -206,3 +206,60 @@ describe('meetingMinutes', () => {
     expect(meetingMinutes(events, ['2026-11-17', '2026-11-18'])).toBe(90)
   })
 })
+
+describe('events that cross midnight or run for days', () => {
+  it('splits an overnight event into one part per London day', () => {
+    const r = parseCalendarPayload({
+      from: '2026-11-17',
+      to: '2026-11-18',
+      events: [{ title: 'Night shift', start: '2026-11-17T23:00:00Z', end: '2026-11-18T01:00:00Z' }],
+    })
+    expect(r.ok && r.events.map(e => [e.day, e.starts_at, e.ends_at, e.all_day])).toEqual([
+      ['2026-11-17', '2026-11-17T23:00:00.000Z', '2026-11-18T00:00:00.000Z', false],
+      ['2026-11-18', '2026-11-18T00:00:00.000Z', '2026-11-18T01:00:00.000Z', false],
+    ])
+    expect(r.ok && new Set(r.events.map(e => e.source_id)).size).toBe(2)
+  })
+  it('keeps the part of an event that began before the range', () => {
+    const r = parseCalendarPayload({
+      from: '2026-11-18',
+      events: [{ title: 'Night shift', start: '2026-11-17T23:00:00Z', end: '2026-11-18T01:00:00Z' }],
+    })
+    expect(r.ok && r.events.map(e => e.day)).toEqual(['2026-11-18'])
+  })
+  it('treats the whole-day parts of a long timed event as all day', () => {
+    const r = parseCalendarPayload({
+      from: '2026-11-16',
+      to: '2026-11-18',
+      events: [{ title: 'Conference', start: '2026-11-16T09:00:00Z', end: '2026-11-18T17:00:00Z' }],
+    })
+    expect(r.ok && r.events.map(e => [e.day, e.all_day])).toEqual([
+      ['2026-11-16', false],
+      ['2026-11-17', true],
+      ['2026-11-18', false],
+    ])
+    // 15h on the first day and 17h on the last, nothing for the whole day between
+    expect(r.ok && meetingMinutes(r.events, ['2026-11-16', '2026-11-17', '2026-11-18'])).toBe(15 * 60 + 17 * 60)
+  })
+  it('lists a multi-day all-day event on each of its days', () => {
+    const r = parseCalendarPayload({
+      from: '2026-11-16',
+      to: '2026-11-20',
+      events: [{ title: 'Annual leave', start: '2026-11-17T00:00:00Z', end: '2026-11-20T00:00:00Z', all_day: true }],
+    })
+    expect(r.ok && r.events.map(e => [e.day, e.all_day])).toEqual([
+      ['2026-11-17', true],
+      ['2026-11-18', true],
+      ['2026-11-19', true],
+    ])
+  })
+  it('does not let a multi-day event swallow the free time of its first day', () => {
+    const r = parseCalendarPayload({
+      from: '2026-11-17',
+      to: '2026-11-18',
+      events: [{ title: 'Offsite', start: '2026-11-17T15:00:00Z', end: '2026-11-18T12:00:00Z' }],
+    })
+    const day1 = r.ok ? r.events.filter(e => e.day === '2026-11-17') : []
+    expect(freeGaps(day1, '2026-11-17', new Date('2026-11-17T07:00:00Z')).map(g => londonClock(g.end))).toEqual(['15:00'])
+  })
+})

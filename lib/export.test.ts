@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { EXPORT_TABLES, buildExport, exportFilename } from './export'
+import { EXPORT_ORDER, EXPORT_TABLES, buildExport, exportFilename, readAllRows } from './export'
 
 describe('buildExport', () => {
   const now = new Date('2026-11-17T06:40:00Z')
@@ -35,5 +35,42 @@ describe('EXPORT_TABLES', () => {
 describe('exportFilename', () => {
   it('is dated in London time', () => {
     expect(exportFilename(new Date('2026-07-01T23:30:00Z'))).toBe('20260702_lifeos_export.json')
+  })
+})
+
+describe('readAllRows', () => {
+  const source = (total: number, serverMax: number) => {
+    const all = Array.from({ length: total }, (_, i) => ({ id: i }))
+    const calls: [number, number][] = []
+    const fetchPage = async (from: number, to: number) => {
+      calls.push([from, to])
+      return { rows: all.slice(from, Math.min(to + 1, from + serverMax)), total }
+    }
+    return { fetchPage, calls }
+  }
+  it('reads every row across pages', async () => {
+    const { fetchPage } = source(2500, 1000)
+    const rows = await readAllRows(fetchPage, 1000)
+    expect(rows).toHaveLength(2500)
+    expect(new Set(rows.map(r => (r as { id: number }).id)).size).toBe(2500)
+  })
+  it('keeps going when the server returns fewer rows than asked for', async () => {
+    const { fetchPage } = source(2500, 400)
+    expect(await readAllRows(fetchPage, 1000)).toHaveLength(2500)
+  })
+  it('reads an empty table in one request', async () => {
+    const { fetchPage, calls } = source(0, 1000)
+    expect(await readAllRows(fetchPage, 1000)).toEqual([])
+    expect(calls).toHaveLength(1)
+  })
+  it('stops if the server runs dry before the stated total', async () => {
+    const fetchPage = async (from: number) => ({ rows: from === 0 ? [{ id: 1 }] : [], total: 50 })
+    expect(await readAllRows(fetchPage, 1000)).toEqual([{ id: 1 }])
+  })
+})
+
+describe('EXPORT_ORDER', () => {
+  it('gives every table a stable order to page by', () => {
+    for (const t of EXPORT_TABLES) expect(EXPORT_ORDER[t].length).toBeGreaterThan(0)
   })
 })

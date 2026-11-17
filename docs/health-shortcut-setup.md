@@ -143,6 +143,8 @@ Send today's events each morning. Whatever you send **replaces** what is stored 
 
 Only title, times, location and calendar name are stored. Notes, attendees and links are not read.
 
+An event that crosses midnight or runs for several days is stored once per day it touches, clipped to that day. A part that fills a whole day is treated as all-day, so it is listed but does not count as meeting time or block free time.
+
 ### Response
 
 - `200` `{ "events": 4, "from": "2026-11-17", "to": "2026-11-17" }`
