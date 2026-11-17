@@ -26,6 +26,8 @@ function AuthForm() {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // This is a single-owner app: signing in never creates an account
+        shouldCreateUser: false,
       },
     })
     if (error) {

@@ -123,6 +123,25 @@ export default async function SettingsPage() {
 
         <section className="mb-8">
           <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-3 px-1">
+            Your data
+          </h2>
+          <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4">
+            <p className="text-muted text-sm mb-3">
+              Download everything in LifeOS as one file: tasks, projects, time, food, journal answers,
+              health and calendar. Keep a copy somewhere other than this device.
+            </p>
+            <a
+              href="/api/export"
+              download
+              className="inline-block px-4 py-2 bg-accent active:bg-accent-strong text-white text-sm font-medium rounded-lg"
+            >
+              Download my data
+            </a>
+          </div>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-3 px-1">
             ClickUp
           </h2>
           <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4 flex items-center justify-between">
