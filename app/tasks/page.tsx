@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import TaskCard from '@/components/TaskCard'
 import BottomNav from '@/components/BottomNav'
 import Link from 'next/link'
+import NewTaskForm from '@/components/NewTaskForm'
 
 type TaskRow = {
   id: string
@@ -82,11 +83,13 @@ export default async function TasksPage() {
           )}
         </div>
 
+        <NewTaskForm />
+
         {tasks.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-faint text-base">No open tasks.</p>
             <p className="text-faint text-sm mt-1">
-              Triage captures in the Inbox to create tasks.
+              Add one above, or sort captures in the Inbox.
             </p>
           </div>
         ) : (

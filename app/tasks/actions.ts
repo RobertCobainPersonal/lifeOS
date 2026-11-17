@@ -3,6 +3,7 @@
 import { londonToday } from '@/lib/dates'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { parseNewTask } from '@/lib/tasks'
 
 export async function completeTask(taskId: string) {
   const supabase = await createClient()
@@ -90,4 +91,53 @@ export async function updateTask(
   revalidatePath('/tasks')
   revalidatePath(`/tasks/${taskId}`)
   revalidatePath('/today')
+}
+
+/**
+ * Create a task directly (not via the Inbox). Optionally pin it to today's
+ * Top 3; if Top 3 is full the task is still created and the caller is told.
+ */
+export async function createTask(input: {
+  title: string
+  domain: string
+  energy: string
+  dueDate: string
+  top3: boolean
+}): Promise<{ error?: string; top3Full?: boolean }> {
+  const parsed = parseNewTask(input)
+  if (!parsed.ok) return { error: parsed.error }
+
+  const supabase = await createClient()
+  const today = londonToday()
+
+  let pin = false
+  if (input.top3) {
+    const [localResult, clickupResult] = await Promise.all([
+      supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_top3', true)
+        .eq('top3_date', today)
+        .eq('status', 'open'),
+      supabase
+        .from('clickup_tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('pinned_top3_date', today),
+    ])
+    pin = (localResult.count ?? 0) + (clickupResult.count ?? 0) < 3
+  }
+
+  const { error } = await supabase.from('tasks').insert({
+    title: parsed.title,
+    domain: parsed.domain,
+    energy: parsed.energy,
+    due_date: parsed.due_date,
+    status: 'open',
+    ...(pin ? { is_top3: true, top3_date: today } : {}),
+  })
+  if (error) return { error: 'Could not save — try again' }
+
+  revalidatePath('/today')
+  revalidatePath('/tasks')
+  return input.top3 && !pin ? { top3Full: true } : {}
 }

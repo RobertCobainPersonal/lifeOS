@@ -25,6 +25,7 @@ import ClickupTop3Item from '@/components/ClickupTop3Item'
 import AdminBatch from '@/components/AdminBatch'
 import MorningPlan from '@/components/MorningPlan'
 import ResetMyDay from '@/components/ResetMyDay'
+import NewTaskForm from '@/components/NewTaskForm'
 
 export default async function TodayPage() {
   const supabase = await createClient()
@@ -271,7 +272,12 @@ export default async function TodayPage() {
         />
       )}
 
-      <div className="px-4 pt-6 pb-44 sm:pb-24">
+      {/* Fixed above the nav on phones; at the top of the page on wider screens */}
+      <div className="sm:px-4 sm:pt-6">
+        <QuickAdd inboxCount={inboxCount} aboveNav />
+      </div>
+
+      <div className="px-4 pt-6 sm:pt-0 pb-44 sm:pb-24">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Today</h1>
@@ -349,6 +355,8 @@ export default async function TodayPage() {
           )}
         </section>
 
+        <NewTaskForm />
+
         <NonNegotiables items={nonNegotiables} />
 
         {hello.length > 0 && (
@@ -413,7 +421,6 @@ export default async function TodayPage() {
         <ResetMyDay top3Tasks={resetTop3} dueTodayTasks={resetDueToday} />
       </div>
 
-      <QuickAdd inboxCount={inboxCount} aboveNav />
       <BottomNav current="today" inboxCount={inboxCount} />
     </div>
   )
