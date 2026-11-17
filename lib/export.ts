@@ -16,6 +16,7 @@ export const EXPORT_TABLES = [
   'activities',
   'daily_health',
   'calendar_events',
+  'people',
 ] as const
 
 export type ExportTable = (typeof EXPORT_TABLES)[number]
@@ -59,6 +60,7 @@ export const EXPORT_ORDER: Record<ExportTable, string[]> = {
   activities: ['source', 'source_id'],
   daily_health: ['day'],
   calendar_events: ['source', 'source_id'],
+  people: ['id'],
 }
 
 /**

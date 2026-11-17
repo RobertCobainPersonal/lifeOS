@@ -35,6 +35,7 @@ export default async function MorePage() {
     { href: '/record', label: 'Record' },
     ...(isOn(settings.data?.features, 'weekly_review') ? [{ href: '/review', label: 'Weekly review' }] : []),
     ...(isOn(settings.data?.features, 'week_ahead') ? [{ href: '/week', label: 'Week ahead' }] : []),
+    ...(isOn(settings.data?.features, 'people') ? [{ href: '/people', label: 'Keeping in touch' }] : []),
     { href: '/settings', label: 'Settings' },
   ]
 

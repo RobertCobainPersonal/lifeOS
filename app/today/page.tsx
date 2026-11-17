@@ -12,6 +12,7 @@ import CalendarLine from '@/components/CalendarLine'
 import { isOn, reviewDue } from '@/lib/features'
 import { sleepLabel } from '@/lib/health'
 import NonNegotiables from '@/components/NonNegotiables'
+import { dueList } from '@/lib/people'
 import NowRow from '@/components/NowRow'
 import FuelLine from '@/components/FuelLine'
 import { dayTotals } from '@/lib/fuel'
@@ -64,6 +65,7 @@ export default async function TodayPage() {
     habitsResult,
     ticksResult,
     sleepResult,
+    peopleResult,
   ] = await Promise.all([
     supabase
       .from('tasks')
@@ -132,6 +134,14 @@ export default async function TodayPage() {
           .order('day', { ascending: false })
           .limit(1)
       : Promise.resolve({ data: [] as { day: string; sleep_minutes: number | null }[] }),
+    isOn(settings?.features, 'people')
+      ? supabase
+          .from('people')
+          .select('name, cadence_days, last_contact, created_at')
+          .eq('archived', false)
+      : Promise.resolve({
+          data: [] as { name: string; cadence_days: number; last_contact: string | null; created_at: string }[],
+        }),
   ])
 
   const allOpen = allOpenResult.data ?? []
@@ -144,6 +154,7 @@ export default async function TodayPage() {
     done: tickedToday.has(h.id),
   }))
   const lastSleep = sleepResult.data?.[0]?.sleep_minutes ?? null
+  const hello = dueList(peopleResult.data ?? [], today)
 
   // Today's calendar, as sent from the phone
   const calendar = (calendarResult.data ?? []) as CalendarEvent[]
@@ -339,6 +350,23 @@ export default async function TodayPage() {
         </section>
 
         <NonNegotiables items={nonNegotiables} />
+
+        {hello.length > 0 && (
+          <Link
+            href="/people"
+            className="mb-6 flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-3 active:bg-sunk"
+          >
+            <span className="text-sm text-ink-soft">
+              <span className="text-muted">Worth a hello</span>{' '}
+              {hello
+                .slice(0, 2)
+                .map(p => p.name)
+                .join(', ')}
+              {hello.length > 2 ? ` +${hello.length - 2}` : ''}
+            </span>
+            <span className="text-faint text-sm">→</span>
+          </Link>
+        )}
 
         <FuelLine
           kcal={fuel.kcal}

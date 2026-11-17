@@ -26,7 +26,7 @@ describe('EXPORT_TABLES', () => {
     expect([...EXPORT_TABLES].sort()).toEqual(
       [
         'activities', 'calendar_events', 'captures', 'clickup_tasks', 'daily_health', 'day_log',
-        'food_entries', 'habit_ticks', 'habits', 'projects', 'saved_meals', 'settings', 'tasks', 'time_entries',
+        'food_entries', 'habit_ticks', 'habits', 'people', 'projects', 'saved_meals', 'settings', 'tasks', 'time_entries',
       ].sort()
     )
   })
