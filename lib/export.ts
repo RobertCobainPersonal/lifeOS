@@ -42,3 +42,39 @@ export function buildExport(rows: Partial<Record<ExportTable, unknown[]>>, now: 
 export function exportFilename(now: Date): string {
   return `${londonDate(now).replaceAll('-', '')}_lifeos_export.json`
 }
+
+/** Columns that give each table a stable order, so paging never repeats or skips a row. */
+export const EXPORT_ORDER: Record<ExportTable, string[]> = {
+  settings: ['id'],
+  captures: ['id'],
+  projects: ['id'],
+  tasks: ['id'],
+  clickup_tasks: ['clickup_id'],
+  day_log: ['day'],
+  time_entries: ['id'],
+  saved_meals: ['id'],
+  food_entries: ['id'],
+  habits: ['id'],
+  habit_ticks: ['habit_id', 'day'],
+  activities: ['source', 'source_id'],
+  daily_health: ['day'],
+  calendar_events: ['source', 'source_id'],
+}
+
+/**
+ * Read a whole table through a paged source. Advances by the rows actually
+ * returned, so a server that caps pages below the requested size still works.
+ */
+export async function readAllRows(
+  fetchPage: (from: number, to: number) => Promise<{ rows: unknown[]; total: number | null }>,
+  pageSize: number
+): Promise<unknown[]> {
+  const rows: unknown[] = []
+  for (;;) {
+    const page = await fetchPage(rows.length, rows.length + pageSize - 1)
+    rows.push(...page.rows)
+    if (page.rows.length === 0) break
+    if (page.total !== null && rows.length >= page.total) break
+  }
+  return rows
+}

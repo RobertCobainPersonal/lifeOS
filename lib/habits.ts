@@ -1,8 +1,11 @@
+import { londonDate } from '@/lib/dates'
+
 export const MAX_HABITS = 7
 
 export interface Habit {
   id: string
   name: string
+  created_at?: string | null
 }
 
 export function parseHabitName(
@@ -18,17 +21,20 @@ export function parseHabitName(
   return { ok: true, name }
 }
 
-/** Days each non-negotiable was kept within a period. */
+/** Days each non-negotiable was kept within a period, counting only days since it was added. */
 export function habitWeek(
   habits: Habit[],
   ticks: { habit_id: string; day: string }[],
   days: string[]
 ): { id: string; name: string; kept: number; of: number }[] {
-  const inPeriod = new Set(days)
-  return habits.map(h => ({
-    id: h.id,
-    name: h.name,
-    kept: new Set(ticks.filter(t => t.habit_id === h.id && inPeriod.has(t.day)).map(t => t.day)).size,
-    of: days.length,
-  }))
+  return habits.map(h => {
+    const since = h.created_at ? londonDate(new Date(h.created_at)) : ''
+    const live = new Set(days.filter(d => d >= since))
+    return {
+      id: h.id,
+      name: h.name,
+      kept: new Set(ticks.filter(t => t.habit_id === h.id && live.has(t.day)).map(t => t.day)).size,
+      of: live.size,
+    }
+  })
 }

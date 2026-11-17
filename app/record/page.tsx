@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { addDays, londonToday } from '@/lib/dates'
 import {
-  MIN_DAYS,
   formatHour,
   formatMinutes,
   freeWindows,
@@ -22,6 +21,8 @@ import { habitWeek } from '@/lib/habits'
 import type { TimeEntry } from '@/lib/types'
 import BottomNav from '@/components/BottomNav'
 import Heatmap from '@/components/Heatmap'
+
+const HOT_SPOT_DAYS = 7
 
 const range = (from: string, length: number) =>
   Array.from({ length }, (_, i) => addDays(from, i))
@@ -71,8 +72,8 @@ export default async function RecordPage() {
 
   const recent = entries.filter(e => last14.includes(e.day))
   const grid = hourGrid(recent, now)
-  // A pattern needs a fortnight of tracked days behind it, like the other cards
-  const spots = trackedDayCount(entries) >= MIN_DAYS ? hotSpots(grid) : []
+  // A pattern needs at least a week of tracked days within the fortnight the heatmap shows
+  const spots = trackedDayCount(recent) >= HOT_SPOT_DAYS ? hotSpots(grid) : []
   const windows = freeWindows(entries, last28, now)
   const split = trainingSplit({ entries, activities, days: last28, now })
 
@@ -82,8 +83,8 @@ export default async function RecordPage() {
   const sleepOn = isOn(settings?.features, 'sleep_line')
   const [habitsResult, ticksResult, healthResult] = await Promise.all([
     habitsOn
-      ? supabase.from('habits').select('id, name').eq('archived', false).order('sort')
-      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+      ? supabase.from('habits').select('id, name, created_at').eq('archived', false).order('sort')
+      : Promise.resolve({ data: [] as { id: string; name: string; created_at: string }[] }),
     habitsOn
       ? supabase.from('habit_ticks').select('habit_id, day').gte('day', thisWeek[0]).lte('day', today)
       : Promise.resolve({ data: [] as { habit_id: string; day: string }[] }),
@@ -119,7 +120,9 @@ export default async function RecordPage() {
                 Your calendar had {formatMinutes(calendarMinutes)} of meetings.
               </p>
             )}
-            {kept.map(h => (
+            {kept
+              .filter(h => h.kept > 0)
+              .map(h => (
               <p key={h.id} className="text-ink-soft text-sm leading-relaxed">
                 {h.name}: {h.kept} of {h.of} days.
               </p>

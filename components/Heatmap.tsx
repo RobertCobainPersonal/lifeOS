@@ -18,7 +18,7 @@ const SHORT: Record<Category, string> = {
 }
 
 /** Five steps of one hue: more time, stronger fill. */
-const STEPS = ['bg-card ring-1 ring-line', 'bg-accent/15', 'bg-accent/35', 'bg-accent/60', 'bg-accent']
+const STEPS = ['bg-card', 'bg-accent/15', 'bg-accent/35', 'bg-accent/60', 'bg-accent']
 
 /** Hour of day against category. Shade shows minutes; tap a cell for the figure. */
 export default function Heatmap({ grid }: { grid: HourRow[] }) {
@@ -70,7 +70,7 @@ export default function Heatmap({ grid }: { grid: HourRow[] }) {
                       onMouseEnter={() => setPicked({ hour: row.hour, category: c })}
                       title={`${CATEGORIES[c].label}, ${formatHour(row.hour)}: ${formatMinutes(minutes)}`}
                       className={`block w-full h-6 rounded-[3px] ${STEPS[step(minutes)]} ${
-                        isPicked ? 'ring-2 ring-ink' : ''
+                        isPicked ? 'ring-2 ring-ink' : minutes <= 0 ? 'ring-1 ring-line' : ''
                       }`}
                     >
                       <span className="sr-only">{formatMinutes(minutes)}</span>
@@ -92,7 +92,7 @@ export default function Heatmap({ grid }: { grid: HourRow[] }) {
       <div className="flex items-center gap-2 mt-2 text-xs text-faint">
         <span>Less</span>
         {STEPS.map(s => (
-          <span key={s} className={`w-4 h-3 rounded-[2px] ${s}`} />
+          <span key={s} className={`w-4 h-3 rounded-[2px] ${s} ${s === 'bg-card' ? 'ring-1 ring-line' : ''}`} />
         ))}
         <span>More · up to {formatMinutes(max)}</span>
       </div>

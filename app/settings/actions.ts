@@ -49,7 +49,8 @@ export async function updateTargets(kcal: number, protein: number) {
   await getOrCreateDayLog(supabase, today)
   const { error: logError } = await supabase
     .from('day_log')
-    .update({ kcal_target: checked.kcal, protein_target: checked.protein })
+    // a hand-set target replaces any day type chosen on Fuel
+    .update({ kcal_target: checked.kcal, protein_target: checked.protein, day_type: null })
     .eq('day', today)
   if (logError) throw new Error(logError.message)
 
@@ -80,6 +81,19 @@ export async function updateBands(input: Record<DayType, string>) {
   const supabase = await createClient()
   const { error } = await supabase.from('settings').update({ kcal_bands: cleaned.bands }).eq('id', 1)
   if (error) throw new Error(error.message)
+
+  // If today already has a day type, its target follows the edited band
+  const today = londonToday()
+  const { data: log } = await supabase.from('day_log').select('day_type').eq('day', today).maybeSingle()
+  const type = log?.day_type as DayType | null | undefined
+  if (type && cleaned.bands[type]) {
+    const { error: logError } = await supabase
+      .from('day_log')
+      .update({ kcal_target: cleaned.bands[type] })
+      .eq('day', today)
+    if (logError) throw new Error(logError.message)
+  }
+  revalidatePath('/today')
   revalidatePath('/settings')
   revalidatePath('/fuel')
 }

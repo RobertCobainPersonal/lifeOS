@@ -17,10 +17,20 @@ describe('parseHabitName', () => {
   })
 })
 
+describe('habitWeek for a new item', () => {
+  const days = ['2026-11-11', '2026-11-12', '2026-11-13', '2026-11-14', '2026-11-15', '2026-11-16', '2026-11-17']
+  it('counts only the days since it was added', () => {
+    const added = [{ id: 'h3', name: 'Water', created_at: '2026-11-16T08:00:00Z' }]
+    expect(habitWeek(added, [{ habit_id: 'h3', day: '2026-11-16' }], days)).toEqual([
+      { id: 'h3', name: 'Water', kept: 1, of: 2 },
+    ])
+  })
+})
+
 describe('habitWeek', () => {
   const habits = [
-    { id: 'h1', name: 'Stretch' },
-    { id: 'h2', name: 'Read' },
+    { id: 'h1', name: 'Stretch', created_at: '2026-11-01T09:00:00Z' },
+    { id: 'h2', name: 'Read', created_at: '2026-11-01T09:00:00Z' },
   ]
   const days = ['2026-11-11', '2026-11-12', '2026-11-13', '2026-11-14', '2026-11-15', '2026-11-16', '2026-11-17']
   it('counts the days each one was kept in the period', () => {

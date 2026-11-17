@@ -1,6 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { EXPORT_TABLES, buildExport, exportFilename, type ExportTable } from '@/lib/export'
+import {
+  EXPORT_ORDER,
+  EXPORT_TABLES,
+  buildExport,
+  exportFilename,
+  readAllRows,
+  type ExportTable,
+} from '@/lib/export'
 
 const PAGE = 1000
 
@@ -13,19 +20,19 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const rows: Partial<Record<ExportTable, unknown[]>> = {}
-  for (const table of EXPORT_TABLES) {
-    const all: unknown[] = []
-    // Supabase returns at most 1,000 rows per request
-    for (let from = 0; ; from += PAGE) {
-      const { data, error } = await supabase.from(table).select('*').range(from, from + PAGE - 1)
-      if (error) {
-        console.error('Export error:', table, error)
-        return NextResponse.json({ error: `Could not read ${table}` }, { status: 500 })
-      }
-      all.push(...(data ?? []))
-      if (!data || data.length < PAGE) break
+  try {
+    for (const table of EXPORT_TABLES) {
+      rows[table] = await readAllRows(async (from, to) => {
+        let query = supabase.from(table).select('*', { count: 'exact' })
+        for (const column of EXPORT_ORDER[table]) query = query.order(column)
+        const { data, error, count } = await query.range(from, to)
+        if (error) throw new Error(`${table}: ${error.message}`)
+        return { rows: data ?? [], total: count }
+      }, PAGE)
     }
-    rows[table] = all
+  } catch (err) {
+    console.error('Export error:', err)
+    return NextResponse.json({ error: 'Could not read all of your data' }, { status: 500 })
   }
 
   const now = new Date()
