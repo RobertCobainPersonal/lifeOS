@@ -21,7 +21,7 @@ export default async function InboxPage() {
   const inboxCount = captures?.length ?? 0
 
   return (
-    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto lg:max-w-3xl lg:box-content lg:pl-56 lg:pr-8">
       <div className="px-4 pt-6 pb-24">
         <h1 className="text-2xl font-bold mb-1">Inbox</h1>
         <p className="text-muted text-sm mb-6">

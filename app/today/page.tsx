@@ -8,7 +8,7 @@ import { getOpenEntry } from '@/lib/time-store'
 import { focusHref } from '@/lib/time'
 import { isLoose, planCandidates, type ProjectTask } from '@/lib/projects'
 import { freeGaps, nextEvent, type CalendarEvent } from '@/lib/calendar'
-import CalendarLine from '@/components/CalendarLine'
+import CalendarCard from '@/components/CalendarCard'
 import { isOn, reviewDue } from '@/lib/features'
 import { sleepLabel } from '@/lib/health'
 import NonNegotiables from '@/components/NonNegotiables'
@@ -261,7 +261,7 @@ export default async function TodayPage() {
   }).format(now)
 
   return (
-    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto lg:max-w-6xl lg:box-content lg:pl-56 lg:pr-8">
       {showMorningPlan && (
         <MorningPlan
           tasks={morningPlanTasks}
@@ -273,11 +273,11 @@ export default async function TodayPage() {
       )}
 
       {/* Fixed above the nav on phones; at the top of the page on wider screens */}
-      <div className="sm:px-4 sm:pt-6">
+      <div className="sm:px-4 sm:pt-6 lg:px-0">
         <QuickAdd inboxCount={inboxCount} aboveNav />
       </div>
 
-      <div className="px-4 pt-6 sm:pt-0 pb-44 sm:pb-24">
+      <div className="px-4 pt-6 sm:pt-0 pb-44 sm:pb-24 lg:px-0 lg:pb-12">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Today</h1>
@@ -296,129 +296,174 @@ export default async function TodayPage() {
           </Link>
         </div>
 
-        <NowRow entry={openEntry} serverNowMs={now.getTime()} />
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8 lg:items-start">
+          <div>
+            <NowRow entry={openEntry} serverNowMs={now.getTime()} />
 
-        {calendar.length > 0 && (
-          <CalendarLine
-            next={upcoming}
-            inProgress={upcoming !== null && new Date(upcoming.starts_at) <= now}
-            allDay={calendar.filter(e => e.all_day)}
-            gaps={gaps}
-            remaining={timedLeft}
-          />
-        )}
-
-        <OneThingCard
-          oneThing={oneThing}
-          options={oneThingOptions}
-          focusHref={
-            oneThing.state === 'open' && canFocus ? focusHref(oneThing.kind, oneThing.id) : null
-          }
-        />
-
-        <section className="mb-6">
-          <div className="flex items-baseline justify-between mb-2 px-1">
-            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide">Top 3</h2>
-            {restCount > 0 && <span className="text-xs text-faint">{restCount} left</span>}
-          </div>
-          {restCount === 0 ? (
-            <p className="text-faint text-sm px-1">
-              {oneThingOptions.length === 0
-                ? 'Nothing pinned. Star tasks from More → Tasks.'
-                : 'Nothing else pinned.'}
-            </p>
-          ) : (
-            <div>
-              {restTop3Tasks.map(task => (
-                <Top3Item
-                  key={task.id}
-                  id={task.id}
-                  title={task.title}
-                  energy={task.energy}
-                  dueDate={task.due_date}
-                  focusHref={canFocus ? focusHref('task', task.id) : null}
-                />
-              ))}
-              {restClickupTop3.map(task => (
-                <ClickupTop3Item
-                  key={task.clickup_id}
-                  clickupId={task.clickup_id}
-                  title={task.title}
-                  status={task.status}
-                  dueDate={task.due_date}
-                  url={task.url}
-                  listName={task.list_name}
-                  focusHref={canFocus ? focusHref('clickup', task.clickup_id) : null}
-                />
-              ))}
+            {/* Phones: calendar near the top. Wide screens: it moves to the right column. */}
+            <div className="lg:hidden">
+              <CalendarCard
+                events={calendar}
+                next={upcoming}
+                inProgress={upcoming !== null && new Date(upcoming.starts_at) <= now}
+                gaps={gaps}
+                remaining={timedLeft}
+                today={today}
+              />
             </div>
-          )}
-        </section>
 
-        <NewTaskForm />
+            <OneThingCard
+              oneThing={oneThing}
+              options={oneThingOptions}
+              focusHref={
+                oneThing.state === 'open' && canFocus ? focusHref(oneThing.kind, oneThing.id) : null
+              }
+            />
 
-        <NonNegotiables items={nonNegotiables} />
+            <section className="mb-6">
+              <div className="flex items-baseline justify-between mb-2 px-1">
+                <h2 className="text-xs font-semibold text-muted uppercase tracking-wide">Top 3</h2>
+                {restCount > 0 && <span className="text-xs text-faint">{restCount} left</span>}
+              </div>
+              {restCount === 0 ? (
+                <p className="text-faint text-sm px-1">
+                  {oneThingOptions.length === 0
+                    ? 'Nothing pinned. Star tasks from More → Tasks.'
+                    : 'Nothing else pinned.'}
+                </p>
+              ) : (
+                <div>
+                  {restTop3Tasks.map(task => (
+                    <Top3Item
+                      key={task.id}
+                      id={task.id}
+                      title={task.title}
+                      energy={task.energy}
+                      dueDate={task.due_date}
+                      focusHref={canFocus ? focusHref('task', task.id) : null}
+                    />
+                  ))}
+                  {restClickupTop3.map(task => (
+                    <ClickupTop3Item
+                      key={task.clickup_id}
+                      clickupId={task.clickup_id}
+                      title={task.title}
+                      status={task.status}
+                      dueDate={task.due_date}
+                      url={task.url}
+                      listName={task.list_name}
+                      focusHref={canFocus ? focusHref('clickup', task.clickup_id) : null}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
 
-        {hello.length > 0 && (
-          <Link
-            href="/people"
-            className="mb-6 flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-3 active:bg-sunk"
-          >
-            <span className="text-sm text-ink-soft">
-              <span className="text-muted">Worth a hello</span>{' '}
-              {hello
-                .slice(0, 2)
-                .map(p => p.name)
-                .join(', ')}
-              {hello.length > 2 ? ` +${hello.length - 2}` : ''}
-            </span>
-            <span className="text-faint text-sm">→</span>
-          </Link>
-        )}
+            <NewTaskForm />
 
-        <FuelLine
-          kcal={fuel.kcal}
-          protein={fuel.protein_g}
-          kcalTarget={dayLog.kcal_target}
-          proteinTarget={dayLog.protein_target}
-        />
+            <div className="lg:hidden">
+              <NonNegotiables items={nonNegotiables} />
 
-        {adminBatch.length > 0 && (
-          <section className="mb-6">
-            <AdminBatch tasks={adminBatch} />
-          </section>
-        )}
+              {hello.length > 0 && (
+                <Link
+                  href="/people"
+                  className="mb-6 flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-3 active:bg-sunk"
+                >
+                  <span className="text-sm text-ink-soft">
+                    <span className="text-muted">Worth a hello</span>{' '}
+                    {hello
+                      .slice(0, 2)
+                      .map(p => p.name)
+                      .join(', ')}
+                    {hello.length > 2 ? ` +${hello.length - 2}` : ''}
+                  </span>
+                  <span className="text-faint text-sm">→</span>
+                </Link>
+              )}
 
-        {isOn(settings?.features, 'weekly_review') &&
-          reviewDue(settings?.last_review_date ?? null, today) && (
-            <Link
-              href="/review"
-              className="mb-4 flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-3 active:bg-sunk"
-            >
-              <span className="text-ink-soft text-sm font-medium">Weekly review</span>
-              <span className="text-faint text-sm">→</span>
-            </Link>
-          )}
+              <FuelLine
+                kcal={fuel.kcal}
+                protein={fuel.protein_g}
+                kcalTarget={dayLog.kcal_target}
+                proteinTarget={dayLog.protein_target}
+              />
+            </div>
 
-        {dayLog.closed_at ? (
-          <Link
-            href="/today/close"
-            className="mb-4 block text-center text-muted text-sm py-3 active:text-ink-soft"
-          >
-            Day closed ✓
-          </Link>
-        ) : (
-          londonHour(now) >= 16 && (
-            <Link
-              href="/today/close"
-              className="mb-4 block text-center bg-card ring-1 ring-line active:bg-sunk rounded-xl py-3.5 text-ink font-medium"
-            >
-              Close the day
-            </Link>
-          )
-        )}
+            {adminBatch.length > 0 && (
+              <section className="mb-6">
+                <AdminBatch tasks={adminBatch} />
+              </section>
+            )}
 
-        <ResetMyDay top3Tasks={resetTop3} dueTodayTasks={resetDueToday} />
+            {isOn(settings?.features, 'weekly_review') &&
+              reviewDue(settings?.last_review_date ?? null, today) && (
+                <Link
+                  href="/review"
+                  className="mb-4 flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-3 active:bg-sunk"
+                >
+                  <span className="text-ink-soft text-sm font-medium">Weekly review</span>
+                  <span className="text-faint text-sm">→</span>
+                </Link>
+              )}
+
+            {dayLog.closed_at ? (
+              <Link
+                href="/today/close"
+                className="mb-4 block text-center text-muted text-sm py-3 active:text-ink-soft"
+              >
+                Day closed ✓
+              </Link>
+            ) : (
+              londonHour(now) >= 16 && (
+                <Link
+                  href="/today/close"
+                  className="mb-4 block text-center bg-card ring-1 ring-line active:bg-sunk rounded-xl py-3.5 text-ink font-medium"
+                >
+                  Close the day
+                </Link>
+              )
+            )}
+
+            <ResetMyDay top3Tasks={resetTop3} dueTodayTasks={resetDueToday} />
+          </div>
+
+          <aside className="hidden lg:block" aria-label="Today at a glance">
+            <CalendarCard
+              events={calendar}
+              next={upcoming}
+              inProgress={upcoming !== null && new Date(upcoming.starts_at) <= now}
+              gaps={gaps}
+              remaining={timedLeft}
+              today={today}
+              expanded
+            />
+            <NonNegotiables items={nonNegotiables} />
+
+            {hello.length > 0 && (
+              <Link
+                href="/people"
+                className="mb-6 flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-3 active:bg-sunk"
+              >
+                <span className="text-sm text-ink-soft">
+                  <span className="text-muted">Worth a hello</span>{' '}
+                  {hello
+                    .slice(0, 2)
+                    .map(p => p.name)
+                    .join(', ')}
+                  {hello.length > 2 ? ` +${hello.length - 2}` : ''}
+                </span>
+                <span className="text-faint text-sm">→</span>
+              </Link>
+            )}
+
+            <FuelLine
+              kcal={fuel.kcal}
+              protein={fuel.protein_g}
+              kcalTarget={dayLog.kcal_target}
+              proteinTarget={dayLog.protein_target}
+            />
+          </aside>
+        </div>
       </div>
 
       <BottomNav current="today" inboxCount={inboxCount} />

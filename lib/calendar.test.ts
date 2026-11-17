@@ -7,6 +7,7 @@ import {
   meetingMinutes,
   nextEvent,
   parseCalendarPayload,
+  parseManualEvent,
   type CalendarEvent,
 } from './calendar'
 
@@ -261,5 +262,63 @@ describe('events that cross midnight or run for days', () => {
     })
     const day1 = r.ok ? r.events.filter(e => e.day === '2026-11-17') : []
     expect(freeGaps(day1, '2026-11-17', new Date('2026-11-17T07:00:00Z')).map(g => londonClock(g.end))).toEqual(['15:00'])
+  })
+})
+
+describe('londonTimeIso with minutes', () => {
+  it('handles minutes in winter and summer', () => {
+    expect(londonTimeIso('2026-11-17', 9, 30)).toBe('2026-11-17T09:30:00.000Z')
+    expect(londonTimeIso('2026-07-02', 9, 30)).toBe('2026-07-02T08:30:00.000Z')
+  })
+})
+
+describe('parseManualEvent', () => {
+  const base = { title: ' Dentist ', day: '2026-11-18', start: '09:30', end: '10:15', allDay: false, location: ' High St ' }
+  it('turns London clock times into a stored event', () => {
+    expect(parseManualEvent(base)).toEqual({
+      ok: true,
+      event: {
+        day: '2026-11-18',
+        starts_at: '2026-11-18T09:30:00.000Z',
+        ends_at: '2026-11-18T10:15:00.000Z',
+        all_day: false,
+        title: 'Dentist',
+        location: 'High St',
+      },
+    })
+  })
+  it('uses summer time when it applies', () => {
+    const r = parseManualEvent({ ...base, day: '2026-07-02' })
+    expect(r.ok && r.event.starts_at).toBe('2026-07-02T08:30:00.000Z')
+  })
+  it('defaults the end to an hour after the start', () => {
+    const r = parseManualEvent({ ...base, end: '' })
+    expect(r.ok && r.event.ends_at).toBe('2026-11-18T10:30:00.000Z')
+  })
+  it('stops a default end at midnight', () => {
+    const r = parseManualEvent({ ...base, start: '23:30', end: '' })
+    expect(r.ok && r.event.ends_at).toBe('2026-11-19T00:00:00.000Z')
+  })
+  it('makes an all-day event cover the whole London day', () => {
+    const r = parseManualEvent({ ...base, allDay: true, start: '', end: '' })
+    expect(r.ok && r.event).toMatchObject({
+      all_day: true,
+      starts_at: '2026-11-18T00:00:00.000Z',
+      ends_at: '2026-11-19T00:00:00.000Z',
+    })
+  })
+  it('needs a title, a real date and a start time for a timed event', () => {
+    expect(parseManualEvent({ ...base, title: '  ' })).toEqual({ ok: false, error: 'Give it a name' })
+    expect(parseManualEvent({ ...base, day: '2026-02-30' }).ok).toBe(false)
+    expect(parseManualEvent({ ...base, start: '' }).ok).toBe(false)
+    expect(parseManualEvent({ ...base, start: '25:00' }).ok).toBe(false)
+  })
+  it('rejects an end before or at the start', () => {
+    expect(parseManualEvent({ ...base, end: '09:00' })).toEqual({ ok: false, error: 'End must be after start' })
+    expect(parseManualEvent({ ...base, end: '09:30' }).ok).toBe(false)
+  })
+  it('leaves a blank location empty', () => {
+    const r = parseManualEvent({ ...base, location: '  ' })
+    expect(r.ok && r.event.location).toBeNull()
   })
 })

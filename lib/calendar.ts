@@ -109,9 +109,9 @@ export function parseCalendarPayload(body: unknown): CalendarPayload {
   return { ok: true, from: b.from, to, events: [...byId.values()] }
 }
 
-/** The instant of a London clock hour on a given day, correct across clock changes. */
-export function londonTimeIso(day: string, hour: number): string {
-  let t = new Date(londonDayStartIso(day)).getTime() + hour * 3_600_000
+/** The instant of a London clock time on a given day, correct across clock changes. */
+export function londonTimeIso(day: string, hour: number, minute = 0): string {
+  let t = new Date(londonDayStartIso(day)).getTime() + (hour * 60 + minute) * 60_000
   t += (hour - londonHour(new Date(t))) * 3_600_000
   return new Date(t).toISOString()
 }
@@ -193,4 +193,62 @@ export function meetingMinutes(events: CalendarEvent[], days: string[]): number 
       (sum, e) => sum + Math.round((new Date(e.ends_at).getTime() - new Date(e.starts_at).getTime()) / 60_000),
       0
     )
+}
+
+export interface ManualEvent {
+  day: string
+  starts_at: string
+  ends_at: string
+  all_day: boolean
+  title: string
+  location: string | null
+}
+
+function clock(value: string): { h: number; m: number } | null {
+  const match = /^(\d{2}):(\d{2})$/.exec(value.trim())
+  if (!match) return null
+  const h = Number(match[1])
+  const m = Number(match[2])
+  return h <= 23 && m <= 59 ? { h, m } : null
+}
+
+/** Validate an event typed into LifeOS (times are London clock times). */
+export function parseManualEvent(raw: {
+  title: string
+  day: string
+  start: string
+  end: string
+  allDay: boolean
+  location: string
+}): { ok: true; event: ManualEvent } | { ok: false; error: string } {
+  const title = text(raw.title, 200)
+  if (!title) return { ok: false, error: 'Give it a name' }
+  if (!isRealDay(raw.day)) return { ok: false, error: 'Choose a date' }
+  const location = text(raw.location, 200)
+  const dayStart = londonDayStartIso(raw.day)
+  const nextDayStart = londonDayStartIso(addDays(raw.day, 1))
+
+  if (raw.allDay) {
+    return {
+      ok: true,
+      event: { day: raw.day, starts_at: dayStart, ends_at: nextDayStart, all_day: true, title, location },
+    }
+  }
+
+  const start = clock(raw.start)
+  if (!start) return { ok: false, error: 'Add a start time' }
+  const starts_at = londonTimeIso(raw.day, start.h, start.m)
+
+  let ends_at: string
+  if (raw.end.trim() === '') {
+    const anHourLater = new Date(new Date(starts_at).getTime() + 3_600_000)
+    ends_at = (anHourLater.getTime() > new Date(nextDayStart).getTime() ? new Date(nextDayStart) : anHourLater).toISOString()
+  } else {
+    const end = clock(raw.end)
+    if (!end) return { ok: false, error: 'That end time is not valid' }
+    ends_at = londonTimeIso(raw.day, end.h, end.m)
+    if (ends_at <= starts_at) return { ok: false, error: 'End must be after start' }
+  }
+
+  return { ok: true, event: { day: raw.day, starts_at, ends_at, all_day: false, title, location } }
 }

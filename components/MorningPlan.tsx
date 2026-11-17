@@ -83,8 +83,10 @@ export default function MorningPlan({
   const full = selected.length >= 3
 
   return (
-    <div className="fixed inset-0 z-[60] bg-paper flex flex-col">
-      <div className="flex items-center justify-between px-4 pt-12 pb-4 border-b border-line">
+    <>
+      <div className="hidden lg:block fixed inset-0 z-[59] bg-ink/30" aria-hidden="true" />
+      <div className="fixed inset-0 z-[60] bg-paper flex flex-col lg:inset-y-10 lg:mx-auto lg:max-w-xl lg:rounded-2xl lg:shadow-xl lg:ring-1 lg:ring-line lg:overflow-hidden">
+      <div className="flex items-center justify-between px-4 pt-12 lg:pt-5 pb-4 border-b border-line">
         <h1 className="text-xl font-bold text-ink">Morning Plan</h1>
         <button
           onClick={handleSkip}
@@ -201,7 +203,8 @@ export default function MorningPlan({
           Skip for today
         </button>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 

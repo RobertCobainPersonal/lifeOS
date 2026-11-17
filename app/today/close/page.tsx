@@ -60,7 +60,7 @@ export default async function ClosePage() {
   const pinnedLeft = tasks.filter(t => t.is_top3 && t.top3_date === today).length
 
   return (
-    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto lg:max-w-3xl lg:box-content lg:pl-56 lg:pr-8">
       <div className="px-4 pt-6 pb-12">
         <div className="flex items-center gap-3 mb-6">
           <Link href="/today" className="text-muted active:text-ink-soft text-sm">
