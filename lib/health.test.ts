@@ -130,3 +130,13 @@ describe('withoutNulls', () => {
     expect(withoutNulls({ a: 0, b: null, c: 'x' })).toEqual({ a: 0, c: 'x' })
   })
 })
+
+import { sleepLabel } from './health'
+
+describe('sleepLabel', () => {
+  it('reads as hours and minutes', () => {
+    expect(sleepLabel(412)).toBe('6h 52m')
+    expect(sleepLabel(480)).toBe('8h')
+    expect(sleepLabel(45)).toBe('45m')
+  })
+})

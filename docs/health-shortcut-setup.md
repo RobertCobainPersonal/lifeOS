@@ -39,7 +39,7 @@ Send once a day. Sending twice is safe: the same day and the same workout update
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `day` | Yes | `YYYY-MM-DD`. The day the sleep and heart figures belong to. |
+| `day` | Yes | `YYYY-MM-DD`. Send yesterday's date with last night's sleep: a sleep figure filed under a day is compared with focus on the following day. |
 | `sleep_minutes`, `resting_hr`, `hrv` | No | Numbers, or numbers as text. Anything missing or not a number is ignored. |
 | `workouts` | No | A list, or a single object. |
 | `workouts[].start` | Yes, per workout | ISO date and time. A workout without it is skipped. |

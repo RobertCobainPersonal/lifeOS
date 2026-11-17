@@ -10,12 +10,15 @@ import {
   hotSpots,
   hourGrid,
   sentences,
+  sleepSplit,
   trackedDayCount,
   trainingSplit,
   weekSummary,
 } from '@/lib/record'
 import { ENTRY_COLUMNS } from '@/lib/time-store'
 import { meetingMinutes, type CalendarEvent } from '@/lib/calendar'
+import { isOn } from '@/lib/features'
+import { habitWeek } from '@/lib/habits'
 import type { TimeEntry } from '@/lib/types'
 import BottomNav from '@/components/BottomNav'
 import Heatmap from '@/components/Heatmap'
@@ -73,6 +76,24 @@ export default async function RecordPage() {
   const windows = freeWindows(entries, last28, now)
   const split = trainingSplit({ entries, activities, days: last28, now })
 
+  // Optional features
+  const { data: settings } = await supabase.from('settings').select('features').eq('id', 1).single()
+  const habitsOn = isOn(settings?.features, 'non_negotiables')
+  const sleepOn = isOn(settings?.features, 'sleep_line')
+  const [habitsResult, ticksResult, healthResult] = await Promise.all([
+    habitsOn
+      ? supabase.from('habits').select('id, name').eq('archived', false).order('sort')
+      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+    habitsOn
+      ? supabase.from('habit_ticks').select('habit_id, day').gte('day', thisWeek[0]).lte('day', today)
+      : Promise.resolve({ data: [] as { habit_id: string; day: string }[] }),
+    sleepOn
+      ? supabase.from('daily_health').select('day, sleep_minutes').gte('day', addDays(from28, -1)).lte('day', today)
+      : Promise.resolve({ data: [] as { day: string; sleep_minutes: number | null }[] }),
+  ])
+  const kept = habitWeek(habitsResult.data ?? [], ticksResult.data ?? [], thisWeek)
+  const sleep = sleepOn ? sleepSplit({ entries, health: healthResult.data ?? [], days: last28, now }) : null
+
   return (
     <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
       <div className="px-4 pt-6 pb-24 space-y-6">
@@ -98,6 +119,11 @@ export default async function RecordPage() {
                 Your calendar had {formatMinutes(calendarMinutes)} of meetings.
               </p>
             )}
+            {kept.map(h => (
+              <p key={h.id} className="text-ink-soft text-sm leading-relaxed">
+                {h.name}: {h.kept} of {h.of} days.
+              </p>
+            ))}
           </div>
         </section>
 
@@ -127,6 +153,23 @@ export default async function RecordPage() {
             <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4">
               <p className="text-ink-soft text-sm leading-relaxed">
                 {listHours(windows.map(w => w.hour).sort((a, b) => a - b))} are usually untracked or rest.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {sleep && (
+          <section>
+            <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
+              Sleep and focus · last 28 days
+            </h2>
+            <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4">
+              <p className="text-ink-soft text-sm leading-relaxed">
+                After seven hours or more of sleep you averaged {formatMinutes(sleep.afterLonger)} of
+                focus; after less, {formatMinutes(sleep.afterShorter)}.
+              </p>
+              <p className="text-faint text-xs mt-2">
+                Based on days with a sleep figure and at least one focus session. A pattern, not a cause.
               </p>
             </div>
           </section>
