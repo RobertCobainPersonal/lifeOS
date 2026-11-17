@@ -190,3 +190,8 @@ export function sentences(current: WeekSummary, previous: WeekSummary): string[]
   }
   return out
 }
+
+/** How many distinct days have at least one time entry. */
+export function trackedDayCount(entries: Pick<TimeEntry, 'day'>[]): number {
+  return new Set(entries.map(e => e.day)).size
+}

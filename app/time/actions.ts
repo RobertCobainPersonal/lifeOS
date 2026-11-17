@@ -6,7 +6,7 @@ import { cleanEnergy, endFields, isCategory, pauseFields } from '@/lib/time'
 import { ENTRY_COLUMNS, startEntry, stopOpenEntry } from '@/lib/time-store'
 import type { Category, TimeEntry } from '@/lib/types'
 
-type StartOutcome = { id: string } | { error: 'focus_running' }
+type StartOutcome = { id: string } | { error: 'focus_running' | 'busy' }
 
 function revalidate() {
   revalidatePath('/today')

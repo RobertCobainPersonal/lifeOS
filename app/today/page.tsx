@@ -9,6 +9,7 @@ import { focusHref } from '@/lib/time'
 import { isLoose, planCandidates, type ProjectTask } from '@/lib/projects'
 import { freeGaps, nextEvent, type CalendarEvent } from '@/lib/calendar'
 import CalendarLine from '@/components/CalendarLine'
+import { isOn, reviewDue } from '@/lib/features'
 import NowRow from '@/components/NowRow'
 import FuelLine from '@/components/FuelLine'
 import { dayTotals } from '@/lib/fuel'
@@ -34,7 +35,11 @@ export default async function TodayPage() {
   const yesterday = addDays(today, -1)
 
   const [settingsResult, dayLog, openEntry] = await Promise.all([
-    supabase.from('settings').select('last_planned_date, slipping_days').eq('id', 1).single(),
+    supabase
+      .from('settings')
+      .select('last_planned_date, slipping_days, features, last_review_date')
+      .eq('id', 1)
+      .single(),
     getOrCreateDayLog(supabase, today),
     getOpenEntry(supabase),
   ])
@@ -315,6 +320,17 @@ export default async function TodayPage() {
             <AdminBatch tasks={adminBatch} />
           </section>
         )}
+
+        {isOn(settings?.features, 'weekly_review') &&
+          reviewDue(settings?.last_review_date ?? null, today) && (
+            <Link
+              href="/review"
+              className="mb-4 flex items-center justify-between bg-card ring-1 ring-line rounded-xl px-4 py-3 active:bg-sunk"
+            >
+              <span className="text-ink-soft text-sm font-medium">Weekly review</span>
+              <span className="text-faint text-sm">→</span>
+            </Link>
+          )}
 
         {dayLog.closed_at ? (
           <Link

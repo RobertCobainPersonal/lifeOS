@@ -6,6 +6,7 @@ import {
   hotSpots,
   hourGrid,
   sentences,
+  trackedDayCount,
   trainingSplit,
   weekSummary,
 } from './record'
@@ -210,5 +211,14 @@ describe('sentences', () => {
   })
   it('says something calm for an empty week', () => {
     expect(sentences(none, none)).toEqual(['Nothing logged this week yet.'])
+  })
+})
+
+describe('trackedDayCount', () => {
+  it('counts distinct days that have any entry', () => {
+    expect(
+      trackedDayCount([entry('2026-11-16', 9, 30), entry('2026-11-16', 11, 30), entry('2026-11-17', 9, 30)])
+    ).toBe(2)
+    expect(trackedDayCount([])).toBe(0)
   })
 })

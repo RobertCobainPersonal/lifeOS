@@ -7,7 +7,7 @@ import type { Category, TimeEntry } from '@/lib/types'
 export const ENTRY_COLUMNS =
   'id, day, mode, category, energy, task_id, clickup_id, label, planned_minutes, started_at, ended_at, paused_at, paused_seconds, distractions, done_note, next_note'
 
-export type StartResult = { entry: TimeEntry } | { error: 'focus_running' }
+export type StartResult = { entry: TimeEntry } | { error: 'focus_running' | 'busy' }
 
 export async function getOpenEntry(supabase: SupabaseClient): Promise<TimeEntry | null> {
   const { data, error } = await supabase
@@ -76,7 +76,7 @@ export async function startEntry(
     .select(ENTRY_COLUMNS)
     .single()
   // 23505: another request opened an entry between our check and insert
-  if (error?.code === '23505') return { error: 'focus_running' }
+  if (error?.code === '23505') return { error: 'busy' }
   if (error) throw new Error(error.message)
   return { entry: data as TimeEntry }
 }

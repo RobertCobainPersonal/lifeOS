@@ -69,7 +69,7 @@ export default function ClickupTop3Item({
             <span className="text-xs text-faint">{listName}</span>
           )}
           {dueDate && (
-            <span className={`text-xs ${isOverdue ? 'text-red-700' : 'text-muted'}`}>
+            <span className={`text-xs ${isOverdue ? 'text-amber-700' : 'text-muted'}`}>
               {isOverdue ? 'overdue · ' : ''}{dueDate}
             </span>
           )}

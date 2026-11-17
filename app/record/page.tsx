@@ -3,12 +3,14 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { addDays, londonToday } from '@/lib/dates'
 import {
+  MIN_DAYS,
   formatHour,
   formatMinutes,
   freeWindows,
   hotSpots,
   hourGrid,
   sentences,
+  trackedDayCount,
   trainingSplit,
   weekSummary,
 } from '@/lib/record'
@@ -66,7 +68,8 @@ export default async function RecordPage() {
 
   const recent = entries.filter(e => last14.includes(e.day))
   const grid = hourGrid(recent, now)
-  const spots = hotSpots(grid)
+  // A pattern needs a fortnight of tracked days behind it, like the other cards
+  const spots = trackedDayCount(entries) >= MIN_DAYS ? hotSpots(grid) : []
   const windows = freeWindows(entries, last28, now)
   const split = trainingSplit({ entries, activities, days: last28, now })
 

@@ -102,6 +102,8 @@ For your own quick-capture Shortcuts.
 - `400` `{ "error": "..." }` unknown action or category, or minutes out of range
 - `401` wrong or missing token
 - `409` `{ "error": "focus_running" }` a focus session is running; end it in the app first
+- `409` `{ "error": "tracking_running" }` on `log` while something is being tracked; send `stop` first
+- `409` `{ "error": "busy" }` two starts arrived together; send it again
 
 ---
 
