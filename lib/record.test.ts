@@ -11,7 +11,7 @@ import {
   trainingSplit,
   weekSummary,
 } from './record'
-import type { Category, TimeEntry } from './types'
+import type { TimeEntry } from './types'
 
 const now = new Date('2026-11-30T20:00:00Z')
 
@@ -28,6 +28,7 @@ function entry(
     day,
     mode: 'track',
     category: 'meetings',
+    activity_id: null,
     energy: null,
     task_id: null,
     clickup_id: null,
@@ -115,6 +116,13 @@ describe('hourGrid', () => {
   })
 })
 
+describe('hourGrid keys', () => {
+  it('groups by the key it is given', () => {
+    const grid = hourGrid([entry('2026-11-16', 9, 30)], now, () => 'work')
+    expect(grid[9].minutes).toEqual({ work: 30 })
+  })
+})
+
 describe('hotSpots', () => {
   const proc = (hour: number, minutes: number) =>
     entry('2026-11-16', hour, minutes, { category: 'procrastinating' })
@@ -181,7 +189,7 @@ describe('trainingSplit', () => {
 describe('sentences', () => {
   const base = {
     focusMinutes: 150,
-    minutesByCategory: { deep_work: 150, meetings: 90 } as Partial<Record<Category, number>>,
+    minutesByCategory: { deep_work: 150, meetings: 90 },
     distractions: 4,
     foodDaysLogged: 3,
     daysClosed: 2,
@@ -212,6 +220,12 @@ describe('sentences', () => {
   })
   it('says something calm for an empty week', () => {
     expect(sentences(none, none)).toEqual(['Nothing logged this week yet.'])
+  })
+  it('names activities with the labels it is given', () => {
+    const hockey = { ...none, minutesByCategory: { hockey: 180 } }
+    expect(sentences(hockey, none, key => (key === 'hockey' ? 'Hockey' : key)).join(' ')).toMatch(
+      'Most time went on Hockey (3h)'
+    )
   })
 })
 

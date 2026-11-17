@@ -5,6 +5,7 @@ import {
   elapsedSeconds,
   formatClock,
   parseTrackBody,
+  STOP_CHOICE,
   remainingSeconds,
   splitByHour,
 } from './time'
@@ -101,23 +102,36 @@ describe('formatClock', () => {
 })
 
 describe('parseTrackBody', () => {
-  it('accepts a start', () => {
-    expect(parseTrackBody({ action: 'start', category: 'meetings', label: ' Standup ', energy: 4 })).toEqual({
+  it('accepts a start with an activity', () => {
+    expect(parseTrackBody({ action: 'start', activity: 'Hockey / Playing', label: ' Match ', energy: 4 })).toEqual({
       ok: true,
       action: 'start',
-      category: 'meetings',
-      label: 'Standup',
+      activity: 'Hockey / Playing',
+      label: 'Match',
       energy: 4,
     })
+  })
+  it('still accepts an older category key', () => {
+    expect(parseTrackBody({ action: 'start', category: 'meetings' })).toMatchObject({ ok: true, activity: 'meetings' })
   })
   it('accepts a stop', () => {
     expect(parseTrackBody({ action: 'stop' })).toEqual({ ok: true, action: 'stop' })
   })
+  it('turns a menu pick into a start, or a stop', () => {
+    expect(parseTrackBody({ action: 'pick', choice: 'Work / Meetings' })).toEqual({
+      ok: true,
+      action: 'start',
+      activity: 'Work / Meetings',
+      label: null,
+      energy: null,
+    })
+    expect(parseTrackBody({ action: 'pick', choice: STOP_CHOICE })).toEqual({ ok: true, action: 'stop' })
+  })
   it('accepts a finished block', () => {
-    expect(parseTrackBody({ action: 'log', category: 'admin', minutes: '30' })).toEqual({
+    expect(parseTrackBody({ action: 'log', activity: 'admin', minutes: '30' })).toEqual({
       ok: true,
       action: 'log',
-      category: 'admin',
+      activity: 'admin',
       minutes: 30,
       label: null,
       energy: null,
@@ -126,15 +140,16 @@ describe('parseTrackBody', () => {
   it('rejects an unknown action', () => {
     expect(parseTrackBody({ action: 'pause' }).ok).toBe(false)
   })
-  it('rejects an unknown category', () => {
-    expect(parseTrackBody({ action: 'start', category: 'napping' }).ok).toBe(false)
+  it('rejects a start with no activity', () => {
+    expect(parseTrackBody({ action: 'start' }).ok).toBe(false)
+    expect(parseTrackBody({ action: 'start', activity: '  ' }).ok).toBe(false)
   })
   it('rejects minutes outside 1 to 240', () => {
     for (const minutes of [0, 241, -5, 'abc', undefined])
-      expect(parseTrackBody({ action: 'log', category: 'admin', minutes }).ok).toBe(false)
+      expect(parseTrackBody({ action: 'log', activity: 'admin', minutes }).ok).toBe(false)
   })
   it('drops an out-of-range energy rather than failing', () => {
-    expect(parseTrackBody({ action: 'start', category: 'rest', energy: 9 })).toMatchObject({
+    expect(parseTrackBody({ action: 'start', activity: 'rest', energy: 9 })).toMatchObject({
       ok: true,
       energy: null,
     })

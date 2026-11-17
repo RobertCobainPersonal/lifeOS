@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { addDays, londonDayStartIso, londonToday } from '@/lib/dates'
 import { getOrCreateDayLog } from '@/lib/daylog'
 import { DEFAULT_PROMPTS, summariseEntries } from '@/lib/closeout'
-import { CATEGORIES } from '@/lib/time'
+import { activityKey, breakdown, groupKey } from '@/lib/activities'
 import { dayTotals } from '@/lib/fuel'
-import { ENTRY_COLUMNS } from '@/lib/time-store'
-import type { Category, TimeEntry } from '@/lib/types'
+import { ENTRY_COLUMNS, getActivities } from '@/lib/time-store'
+import type { TimeEntry } from '@/lib/types'
 import CloseoutForm from '@/components/CloseoutForm'
 
 function formatMinutes(minutes: number): string {
@@ -52,9 +52,13 @@ export default async function ClosePage() {
     dayLog.closeout?.prompts ??
     (Array.isArray(settings.data?.journal_prompts) ? settings.data.journal_prompts : DEFAULT_PROMPTS)
 
-  const summary = summariseEntries((entriesResult.data ?? []) as TimeEntry[], now)
-  const categories = (Object.entries(summary.minutesByCategory) as [Category, number][]).sort(
-    (a, b) => b[1] - a[1]
+  const dayEntries = (entriesResult.data ?? []) as TimeEntry[]
+  const acts = await getActivities(supabase)
+  const summary = summariseEntries(dayEntries, now, groupKey(acts))
+  const groups = breakdown(
+    summary.minutesByCategory,
+    summariseEntries(dayEntries, now, activityKey(acts)).minutesByCategory,
+    acts
   )
   const tasks = openTasks.data ?? []
   const pinnedLeft = tasks.filter(t => t.is_top3 && t.top3_date === today).length
@@ -80,11 +84,12 @@ export default async function ClosePage() {
               {summary.focusSessions === 1 ? '' : 's'}
             </p>
           )}
-          {categories.length > 0 && (
-            <p className="text-muted">
-              {categories.map(([c, m]) => `${CATEGORIES[c].label} ${formatMinutes(m)}`).join(' · ')}
+          {groups.map(g => (
+            <p key={g.id} className="text-muted">
+              {g.name} {formatMinutes(g.minutes)}
+              {g.parts.length > 0 && `: ${g.parts.map(p => `${p.name} ${formatMinutes(p.minutes)}`).join(', ')}`}
             </p>
-          )}
+          ))}
           {foodEntries.length > 0 && (
             <p className="text-ink-soft">
               {fuel.kcal.toLocaleString('en-GB')}

@@ -2,9 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { cleanEnergy, endFields, isCategory, pauseFields } from '@/lib/time'
-import { ENTRY_COLUMNS, startEntry, stopOpenEntry } from '@/lib/time-store'
-import type { Category, TimeEntry } from '@/lib/types'
+import { findActivity } from '@/lib/activities'
+import { cleanEnergy, endFields, pauseFields } from '@/lib/time'
+import { ENTRY_COLUMNS, getActivities, startEntry, stopOpenEntry } from '@/lib/time-store'
+import type { TimeEntry } from '@/lib/types'
 
 type StartOutcome = { id: string } | { error: 'focus_running' | 'busy' }
 
@@ -25,11 +26,12 @@ export async function startFocus(input: {
     throw new Error('Length must be between 1 and 240 minutes')
   }
   const supabase = await createClient()
+  const deepWork = (await getActivities(supabase)).byLegacy.get('deep_work') ?? null
   const result = await startEntry(
     supabase,
     {
       mode: 'focus',
-      category: 'deep_work',
+      activity: deepWork,
       label: input.label.trim().slice(0, 120) || 'Focus',
       energy: cleanEnergy(input.energy),
       taskId: input.taskId ?? null,
@@ -43,17 +45,18 @@ export async function startFocus(input: {
 }
 
 export async function startTrack(input: {
-  category: Category
+  activityId: string
   label?: string
   energy?: number | null
 }): Promise<StartOutcome> {
-  if (!isCategory(input.category)) throw new Error('Unknown category')
   const supabase = await createClient()
+  const activity = findActivity(input.activityId, await getActivities(supabase))
+  if (!activity) throw new Error('That activity is no longer in the list')
   const result = await startEntry(
     supabase,
     {
       mode: 'track',
-      category: input.category,
+      activity,
       label: input.label?.trim().slice(0, 120) || null,
       energy: cleanEnergy(input.energy),
     },

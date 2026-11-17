@@ -2,10 +2,27 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { londonDate } from '@/lib/dates'
 import { endFields } from '@/lib/time'
+import { indexActivities, type Activity, type ActivityIndex } from '@/lib/activities'
 import type { Category, TimeEntry } from '@/lib/types'
 
 export const ENTRY_COLUMNS =
-  'id, day, mode, category, energy, task_id, clickup_id, label, planned_minutes, started_at, ended_at, paused_at, paused_seconds, distractions, done_note, next_note'
+  'id, day, mode, category, activity_id, energy, task_id, clickup_id, label, planned_minutes, started_at, ended_at, paused_at, paused_seconds, distractions, done_note, next_note'
+
+export const ACTIVITY_COLUMNS = 'id, name, parent_id, sort, archived, legacy_category'
+
+/** Every activity, archived included, so older entries keep their names. */
+export async function getActivities(supabase: SupabaseClient): Promise<ActivityIndex> {
+  const { data, error } = await supabase.from('time_activities').select(ACTIVITY_COLUMNS)
+  if (error) throw new Error(error.message)
+  return indexActivities((data ?? []) as Activity[])
+}
+
+/** What an entry records about its activity. Older categories are kept for older reports. */
+export type EntryActivity = Pick<Activity, 'id' | 'legacy_category'>
+const activityFields = (a: EntryActivity | null, fallback: Category | null = null) => ({
+  activity_id: a?.id ?? null,
+  category: ((a ? a.legacy_category : null) ?? fallback) as Category | null,
+})
 
 export type StartResult = { entry: TimeEntry } | { error: 'focus_running' | 'busy' }
 
@@ -41,7 +58,7 @@ export async function startEntry(
   supabase: SupabaseClient,
   input: {
     mode: 'focus' | 'track'
-    category: Category
+    activity: EntryActivity | null
     label: string | null
     energy: number | null
     taskId?: string | null
@@ -65,7 +82,7 @@ export async function startEntry(
     .insert({
       day: londonDate(now),
       mode: input.mode,
-      category: input.category,
+      ...activityFields(input.activity, input.mode === 'focus' ? 'deep_work' : null),
       label: input.label,
       energy: input.energy,
       task_id: input.taskId ?? null,
@@ -84,7 +101,7 @@ export async function startEntry(
 /** Record a finished block of minutes ending now. */
 export async function logBlock(
   supabase: SupabaseClient,
-  input: { category: Category; minutes: number; label: string | null; energy: number | null },
+  input: { activity: EntryActivity; minutes: number; label: string | null; energy: number | null },
   now: Date
 ): Promise<TimeEntry> {
   const startedAt = new Date(now.getTime() - input.minutes * 60_000)
@@ -93,7 +110,7 @@ export async function logBlock(
     .insert({
       day: londonDate(startedAt),
       mode: 'track',
-      category: input.category,
+      ...activityFields(input.activity),
       label: input.label,
       energy: input.energy,
       started_at: startedAt.toISOString(),

@@ -2,11 +2,20 @@
 
 import { useState, useTransition } from 'react'
 import { stopEntry } from '@/app/time/actions'
-import { CATEGORIES, elapsedSeconds, formatClock } from '@/lib/time'
+import { elapsedSeconds, formatClock } from '@/lib/time'
 import type { TimeEntry } from '@/lib/types'
 import { useNow } from '@/components/useNow'
 
-export default function TrackRunning({ entry, serverNowMs }: { entry: TimeEntry; serverNowMs: number }) {
+export default function TrackRunning({
+  entry,
+  name,
+  serverNowMs,
+}: {
+  entry: TimeEntry
+  /** e.g. "Hockey · Playing" */
+  name: string
+  serverNowMs: number
+}) {
   const now = useNow(serverNowMs)
   const [failed, setFailed] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -27,7 +36,7 @@ export default function TrackRunning({ entry, serverNowMs }: { entry: TimeEntry;
       <div className="flex-1 min-w-0">
         <p className="text-xs text-muted">Tracking</p>
         <p className="text-ink font-semibold truncate">
-          {CATEGORIES[entry.category].label}
+          {name}
           {entry.label ? <span className="text-muted font-normal"> · {entry.label}</span> : null}
         </p>
         <p className="text-2xl font-bold tabular-nums mt-1" role="timer">

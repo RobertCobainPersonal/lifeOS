@@ -1,5 +1,5 @@
 import { elapsedSeconds } from '@/lib/time'
-import type { Category, TimeEntry } from '@/lib/types'
+import type { TimeEntry } from '@/lib/types'
 
 export const DEFAULT_PROMPTS = [
   'What went well today?',
@@ -37,24 +37,33 @@ export interface EntrySummary {
   focusMinutes: number
   focusSessions: number
   distractions: number
-  minutesByCategory: Partial<Record<Category, number>>
+  /** Minutes by whatever key the summary was asked for (group, activity or older category). */
+  minutesByCategory: Record<string, number>
 }
 
 type SummaryEntry = Pick<
   TimeEntry,
-  'mode' | 'category' | 'started_at' | 'ended_at' | 'paused_at' | 'paused_seconds' | 'distractions'
+  'mode' | 'category' | 'activity_id' | 'started_at' | 'ended_at' | 'paused_at' | 'paused_seconds' | 'distractions'
 >
 
 /** Totals for a set of time entries. Running entries count up to now. */
-export function summariseEntries(entries: SummaryEntry[], now: Date): EntrySummary {
-  const seconds: Partial<Record<Category, number>> = {}
+export type EntryKey = (e: Pick<TimeEntry, 'category' | 'activity_id'>) => string
+export const byCategory: EntryKey = e => e.category ?? e.activity_id ?? 'other'
+
+export function summariseEntries(
+  entries: (Omit<SummaryEntry, 'activity_id'> & { activity_id?: string | null })[],
+  now: Date,
+  keyOf: EntryKey = byCategory
+): EntrySummary {
+  const seconds: Record<string, number> = {}
   let focusSeconds = 0
   let focusSessions = 0
   let distractions = 0
 
   for (const e of entries) {
     const s = elapsedSeconds(e, now)
-    seconds[e.category] = (seconds[e.category] ?? 0) + s
+    const key = keyOf({ category: e.category, activity_id: e.activity_id ?? null })
+    seconds[key] = (seconds[key] ?? 0) + s
     distractions += e.distractions
     if (e.mode === 'focus') {
       focusSeconds += s
@@ -62,8 +71,8 @@ export function summariseEntries(entries: SummaryEntry[], now: Date): EntrySumma
     }
   }
 
-  const minutesByCategory: Partial<Record<Category, number>> = {}
-  for (const [category, s] of Object.entries(seconds) as [Category, number][]) {
+  const minutesByCategory: Record<string, number> = {}
+  for (const [category, s] of Object.entries(seconds)) {
     const minutes = Math.round(s / 60)
     if (minutes > 0) minutesByCategory[category] = minutes
   }

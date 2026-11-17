@@ -1,7 +1,7 @@
 import { addDays } from '@/lib/dates'
-import { summariseEntries } from '@/lib/closeout'
-import { CATEGORIES, splitByHour } from '@/lib/time'
-import type { Category, TimeEntry } from '@/lib/types'
+import { byCategory, summariseEntries, type EntryKey } from '@/lib/closeout'
+import { CATEGORIES, isCategory, splitByHour } from '@/lib/time'
+import type { TimeEntry } from '@/lib/types'
 
 /** Comparisons and patterns stay hidden until there are this many days behind them. */
 export const MIN_DAYS = 14
@@ -12,7 +12,7 @@ const WAKING_HOURS = { start: 6, end: 22 }
 
 export interface WeekSummary {
   focusMinutes: number
-  minutesByCategory: Partial<Record<Category, number>>
+  minutesByCategory: Record<string, number>
   distractions: number
   foodDaysLogged: number
   daysClosed: number
@@ -25,10 +25,11 @@ export function weekSummary(input: {
   food: { day: string }[]
   logs: { day: string; closed_at: string | null }[]
   now: Date
+  keyOf?: EntryKey
 }): WeekSummary {
   const inWeek = new Set(input.days)
   const entries = input.entries.filter(e => inWeek.has(e.day))
-  const totals = summariseEntries(entries, input.now)
+  const totals = summariseEntries(entries, input.now, input.keyOf)
   const rated = entries.filter(e => e.energy !== null)
 
   return {
@@ -44,19 +45,20 @@ export function weekSummary(input: {
   }
 }
 
-export type HourRow = { hour: number; minutes: Partial<Record<Category, number>> }
+export type HourRow = { hour: number; minutes: Record<string, number> }
 
 /** Minutes per category for each London hour of the day. Always 24 rows. */
-export function hourGrid(entries: TimeEntry[], now: Date): HourRow[] {
-  const seconds: Partial<Record<Category, number>>[] = Array.from({ length: 24 }, () => ({}))
+export function hourGrid(entries: TimeEntry[], now: Date, keyOf: EntryKey = byCategory): HourRow[] {
+  const seconds: Record<string, number>[] = Array.from({ length: 24 }, () => ({}))
   for (const e of entries) {
+    const key = keyOf(e)
     for (const part of splitByHour(e, now)) {
-      seconds[part.hour][e.category] = (seconds[part.hour][e.category] ?? 0) + part.seconds
+      seconds[part.hour][key] = (seconds[part.hour][key] ?? 0) + part.seconds
     }
   }
   return seconds.map((row, hour) => {
-    const minutes: Partial<Record<Category, number>> = {}
-    for (const [category, s] of Object.entries(row) as [Category, number][]) {
+    const minutes: Record<string, number> = {}
+    for (const [category, s] of Object.entries(row)) {
       const m = Math.round(s / 60)
       if (m > 0) minutes[category] = m
     }
@@ -149,8 +151,14 @@ export function formatHour(hour: number): string {
 }
 
 /** The week in plain sentences. Describes; never judges. */
-export function sentences(current: WeekSummary, previous: WeekSummary): string[] {
-  const categories = (Object.entries(current.minutesByCategory) as [Category, number][]).sort(
+const categoryLabel = (key: string) => (isCategory(key) ? CATEGORIES[key].label : key)
+
+export function sentences(
+  current: WeekSummary,
+  previous: WeekSummary,
+  labelFor: (key: string) => string = categoryLabel
+): string[] {
+  const categories = Object.entries(current.minutesByCategory).sort(
     (a, b) => b[1] - a[1]
   )
   if (categories.length === 0 && current.foodDaysLogged === 0 && current.daysClosed === 0) {
@@ -174,7 +182,7 @@ export function sentences(current: WeekSummary, previous: WeekSummary): string[]
   if (categories.length > 0) {
     const parts = categories
       .slice(0, 3)
-      .map(([category, minutes]) => `${CATEGORIES[category].label} (${formatMinutes(minutes)})`)
+      .map(([category, minutes]) => `${labelFor(category)} (${formatMinutes(minutes)})`)
     out.push(`Most time went on ${parts.join(', then ')}.`)
   }
 

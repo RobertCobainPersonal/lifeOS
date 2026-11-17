@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { getOpenEntry } from '@/lib/time-store'
+import { getActivities, getOpenEntry } from '@/lib/time-store'
+import { labelOf, resolveEntry, shortcutMenu } from '@/lib/activities'
 import BottomNav from '@/components/BottomNav'
-import CategoryGrid from '@/components/CategoryGrid'
+import ActivityPicker from '@/components/ActivityPicker'
 import FocusStartForm from '@/components/FocusStartForm'
 import FocusTimer from '@/components/FocusTimer'
 import TrackRunning from '@/components/TrackRunning'
@@ -24,8 +25,9 @@ export default async function TimePage({
   if (!user) redirect('/auth')
 
   const now = new Date()
-  const [open, inbox, focusTask, focusWork] = await Promise.all([
+  const [open, activities, inbox, focusTask, focusWork] = await Promise.all([
     getOpenEntry(supabase),
+    getActivities(supabase),
     supabase.from('captures').select('*', { count: 'exact', head: true }).is('triaged_at', null),
     taskId
       ? supabase.from('tasks').select('id, title').eq('id', taskId).eq('status', 'open').maybeSingle()
@@ -34,6 +36,8 @@ export default async function TimePage({
       ? supabase.from('clickup_tasks').select('clickup_id, title').eq('clickup_id', clickupId).maybeSingle()
       : Promise.resolve({ data: null }),
   ])
+
+  const running = open ? resolveEntry(open, activities) : null
 
   const focusTarget = focusTask.data
     ? { label: focusTask.data.title as string, taskId: focusTask.data.id as string }
@@ -60,14 +64,18 @@ export default async function TimePage({
           <div className="space-y-6">
             {focusTarget && <FocusStartForm {...focusTarget} />}
 
-            {open && <TrackRunning entry={open} serverNowMs={now.getTime()} />}
+            {open && <TrackRunning entry={open} name={labelOf(running?.id ?? null, activities)} serverNowMs={now.getTime()} />}
 
             {!focusTarget && (
               <div>
                 <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
                   {open ? 'Switch to' : 'What are you doing?'}
                 </h2>
-                <CategoryGrid current={open?.category ?? null} />
+                <ActivityPicker
+                  groups={shortcutMenu(activities)}
+                  currentId={running?.id ?? null}
+                  currentGroup={running?.group ?? null}
+                />
               </div>
             )}
           </div>

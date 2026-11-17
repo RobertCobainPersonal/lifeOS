@@ -25,7 +25,7 @@ describe('EXPORT_TABLES', () => {
   it('covers everything a person puts into LifeOS', () => {
     expect([...EXPORT_TABLES].sort()).toEqual(
       [
-        'activities', 'calendar_events', 'captures', 'clickup_tasks', 'daily_health', 'day_log',
+        'activities', 'calendar_events', 'captures', 'time_activities', 'clickup_tasks', 'daily_health', 'day_log',
         'food_entries', 'habit_ticks', 'habits', 'people', 'projects', 'saved_meals', 'settings', 'tasks', 'time_entries',
       ].sort()
     )

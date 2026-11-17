@@ -14,7 +14,9 @@ import {
   trainingSplit,
   weekSummary,
 } from '@/lib/record'
-import { ENTRY_COLUMNS } from '@/lib/time-store'
+import { summariseEntries } from '@/lib/closeout'
+import { activityKey, breakdown, groupKey } from '@/lib/activities'
+import { ENTRY_COLUMNS, getActivities } from '@/lib/time-store'
 import { meetingMinutes, type CalendarEvent } from '@/lib/calendar'
 import { isOn } from '@/lib/features'
 import { habitWeek } from '@/lib/habits'
@@ -43,7 +45,7 @@ export default async function RecordPage() {
   const today = londonToday(now)
   const from28 = addDays(today, -27)
 
-  const [entriesResult, foodResult, logsResult, activitiesResult, inbox, calendarResult] = await Promise.all([
+  const [entriesResult, foodResult, logsResult, workoutsResult, inbox, calendarResult, acts] = await Promise.all([
     supabase.from('time_entries').select(ENTRY_COLUMNS).gte('day', addDays(from28, -1)).lte('day', today),
     supabase.from('food_entries').select('day').gte('day', addDays(today, -13)).lte('day', today),
     supabase.from('day_log').select('day, closed_at').gte('day', addDays(today, -13)).lte('day', today),
@@ -54,28 +56,39 @@ export default async function RecordPage() {
       .select('source, source_id, day, starts_at, ends_at, all_day, title, location, calendar')
       .gte('day', addDays(today, -6))
       .lte('day', today),
+    getActivities(supabase),
   ])
 
   const entries = (entriesResult.data ?? []) as TimeEntry[]
   const food = foodResult.data ?? []
   const logs = logsResult.data ?? []
-  const activities = activitiesResult.data ?? []
+  const workouts = workoutsResult.data ?? []
+  const byGroup = groupKey(acts)
+  const nameOf = (key: string) => acts.byId.get(key)?.name ?? key
 
   const thisWeek = range(addDays(today, -6), 7)
   const lastWeek = range(addDays(today, -13), 7)
   const last14 = range(addDays(today, -13), 14)
   const last28 = range(from28, 28)
 
-  const current = weekSummary({ days: thisWeek, entries, food, logs, now })
+  const current = weekSummary({ days: thisWeek, entries, food, logs, now, keyOf: byGroup })
   const calendarMinutes = meetingMinutes((calendarResult.data ?? []) as CalendarEvent[], thisWeek)
-  const previous = weekSummary({ days: lastWeek, entries, food, logs, now })
+  const previous = weekSummary({ days: lastWeek, entries, food, logs, now, keyOf: byGroup })
+  const weekEntries = entries.filter(e => thisWeek.includes(e.day))
+  const groups = breakdown(
+    current.minutesByCategory,
+    summariseEntries(weekEntries, now, activityKey(acts)).minutesByCategory,
+    acts
+  ).filter(g => g.parts.length > 0)
 
   const recent = entries.filter(e => last14.includes(e.day))
-  const grid = hourGrid(recent, now)
-  // A pattern needs at least a week of tracked days within the fortnight the heatmap shows
-  const spots = trackedDayCount(recent) >= HOT_SPOT_DAYS ? hotSpots(grid) : []
+  const grid = hourGrid(recent, now, byGroup)
+  const columns = acts.groups.map(g => ({ key: g.id, label: g.name }))
+  // A pattern needs at least a week of tracked days within the fortnight the heatmap shows.
+  // Procrastinating keeps its older category key, so it is found by that whatever it is called.
+  const spots = trackedDayCount(recent) >= HOT_SPOT_DAYS ? hotSpots(hourGrid(recent, now)) : []
   const windows = freeWindows(entries, last28, now)
-  const split = trainingSplit({ entries, activities, days: last28, now })
+  const split = trainingSplit({ entries, activities: workouts, days: last28, now })
 
   // Optional features
   const { data: settings } = await supabase.from('settings').select('features').eq('id', 1).single()
@@ -110,7 +123,7 @@ export default async function RecordPage() {
             Last 7 days
           </h2>
           <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4 space-y-2">
-            {sentences(current, previous).map(line => (
+            {sentences(current, previous, nameOf).map(line => (
               <p key={line} className="text-ink-soft text-sm leading-relaxed">
                 {line}
               </p>
@@ -120,6 +133,12 @@ export default async function RecordPage() {
                 Your calendar had {formatMinutes(calendarMinutes)} of meetings.
               </p>
             )}
+            {groups.map(g => (
+              <p key={g.id} className="text-ink-soft text-sm leading-relaxed">
+                {g.name} {formatMinutes(g.minutes)}:{' '}
+                {g.parts.map(p => `${p.name} ${formatMinutes(p.minutes)}`).join(', ')}.
+              </p>
+            ))}
             {kept
               .filter(h => h.kept > 0)
               .map(h => (
@@ -136,7 +155,7 @@ export default async function RecordPage() {
               Where time went · last 14 days
             </h2>
             <div className="bg-card/60 rounded-xl px-3 py-4">
-              <Heatmap grid={grid} />
+              <Heatmap grid={grid} columns={columns} />
             </div>
             {spots.length > 0 && (
               <p className="text-muted text-sm mt-3 px-1">
