@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { addDays, londonHour, londonToday } from '@/lib/dates'
 import { getOrCreateDayLog } from '@/lib/daylog'
 import { resolveOneThing } from '@/lib/onething'
-import { getOpenEntry } from '@/lib/time-store'
+import { getActivities, getOpenEntry } from '@/lib/time-store'
+import { labelOf, resolveEntry } from '@/lib/activities'
 import { focusHref } from '@/lib/time'
 import { isLoose, planCandidates, type ProjectTask } from '@/lib/projects'
 import { freeGaps, nextEvent, type CalendarEvent } from '@/lib/calendar'
@@ -38,7 +39,7 @@ export default async function TodayPage() {
   const today = londonToday(now)
   const yesterday = addDays(today, -1)
 
-  const [settingsResult, dayLog, openEntry] = await Promise.all([
+  const [settingsResult, dayLog, openEntry, activities] = await Promise.all([
     supabase
       .from('settings')
       .select('last_planned_date, slipping_days, features, last_review_date')
@@ -46,6 +47,7 @@ export default async function TodayPage() {
       .single(),
     getOrCreateDayLog(supabase, today),
     getOpenEntry(supabase),
+    getActivities(supabase),
   ])
   const settings = settingsResult.data
   const slippingThreshold = new Date(
@@ -298,7 +300,11 @@ export default async function TodayPage() {
 
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8 lg:items-start">
           <div>
-            <NowRow entry={openEntry} serverNowMs={now.getTime()} />
+            <NowRow
+              entry={openEntry}
+              activityName={openEntry ? labelOf(resolveEntry(openEntry, activities).id, activities) : undefined}
+              serverNowMs={now.getTime()}
+            />
 
             {/* Phones: calendar near the top. Wide screens: it moves to the right column. */}
             <div className="lg:hidden">

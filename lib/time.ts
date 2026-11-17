@@ -1,3 +1,4 @@
+import { STOP_CHOICE } from '@/lib/activities'
 import { londonDate, londonHour } from '@/lib/dates'
 import type { Category, TimeEntry } from '@/lib/types'
 
@@ -78,13 +79,16 @@ export function formatClock(totalSeconds: number): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`
 }
 
+export { STOP_CHOICE }
+
+/** `activity` is whatever names it: an id, "Group / Part", a name, or an older category key. */
 export type TrackRequest =
-  | { ok: true; action: 'start'; category: Category; label: string | null; energy: number | null }
+  | { ok: true; action: 'start'; activity: string; label: string | null; energy: number | null }
   | { ok: true; action: 'stop' }
   | {
       ok: true
       action: 'log'
-      category: Category
+      activity: string
       minutes: number
       label: string | null
       energy: number | null
@@ -111,17 +115,23 @@ export function parseTrackBody(body: unknown): TrackRequest {
 
   if (b.action === 'stop') return { ok: true, action: 'stop' }
 
+  if (b.action === 'pick') {
+    const choice = typeof b.choice === 'string' ? b.choice.trim() : ''
+    if (choice === STOP_CHOICE) return { ok: true, action: 'stop' }
+    if (choice === '') return { ok: false, error: 'choice is missing' }
+    return { ok: true, action: 'start', activity: choice, label: null, energy: null }
+  }
+
   if (b.action !== 'start' && b.action !== 'log') {
-    return { ok: false, error: 'action must be start, stop or log' }
+    return { ok: false, error: 'action must be start, stop, pick or log' }
   }
-  if (!isCategory(b.category)) {
-    return { ok: false, error: `category must be one of: ${CATEGORY_KEYS.join(', ')}` }
-  }
+  const ref = typeof b.activity === 'string' ? b.activity.trim() : typeof b.category === 'string' ? b.category.trim() : ''
+  if (ref === '') return { ok: false, error: 'activity is missing' }
   const label = cleanLabel(b.label)
   const energy = cleanEnergy(b.energy)
 
   if (b.action === 'start') {
-    return { ok: true, action: 'start', category: b.category, label, energy }
+    return { ok: true, action: 'start', activity: ref, label, energy }
   }
 
   const minutes = typeof b.minutes === 'string' ? Number(b.minutes) : b.minutes
@@ -131,7 +141,7 @@ export function parseTrackBody(body: unknown): TrackRequest {
   return {
     ok: true,
     action: 'log',
-    category: b.category,
+    activity: ref,
     minutes: Math.round(minutes),
     label,
     energy,

@@ -10,6 +10,9 @@ import { resolveBands } from '@/lib/fuel'
 import FeatureToggles from '@/components/FeatureToggles'
 import BandsForm from '@/components/BandsForm'
 import HabitsForm from '@/components/HabitsForm'
+import ActivitiesForm from '@/components/ActivitiesForm'
+import { labelOf, shortcutMenu } from '@/lib/activities'
+import { getActivities } from '@/lib/time-store'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -27,6 +30,12 @@ export default async function SettingsPage() {
   const habits = isOn(settings?.features, 'non_negotiables')
     ? (await supabase.from('habits').select('id, name').eq('archived', false).order('sort')).data ?? []
     : null
+
+  const acts = await getActivities(supabase)
+  const archivedActs = [...acts.byId.values()]
+    .filter(a => a.archived)
+    .map(a => ({ id: a.id, name: labelOf(a.id, acts) }))
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   const slippingDays = settings?.slipping_days ?? 5
   const hasClickUp = !!process.env.CLICKUP_API_TOKEN
@@ -65,6 +74,18 @@ export default async function SettingsPage() {
               kcal={settings?.default_kcal ?? 2400}
               protein={settings?.default_protein ?? 160}
             />
+          </div>
+        </section>
+
+        <section id="activities" className="mb-8 scroll-mt-6">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-3 px-1">
+            What you track time on
+          </h2>
+          <div className="bg-card ring-1 ring-line rounded-xl px-4 py-3">
+            <p className="text-muted text-sm mb-1">
+              Groups with optional parts. Archiving hides one from the list but keeps its past time.
+            </p>
+            <ActivitiesForm groups={shortcutMenu(acts)} archived={archivedActs} />
           </div>
         </section>
 

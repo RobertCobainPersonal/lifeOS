@@ -74,7 +74,9 @@ export interface TimeEntry {
   id: string
   day: string
   mode: 'focus' | 'track'
-  category: Category
+  /** Older fixed category; new entries carry it only when their activity has one. */
+  category: Category | null
+  activity_id: string | null
   energy: number | null
   task_id: string | null
   clickup_id: string | null

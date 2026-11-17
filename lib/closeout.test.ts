@@ -60,6 +60,14 @@ describe('summariseEntries', () => {
     ]
     expect(summariseEntries(entries, now).minutesByCategory).toEqual({ admin: 20 })
   })
+  it('groups by the key it is given', () => {
+    const entries = [
+      { ...base, mode: 'track' as const, category: null, activity_id: 'h-play', started_at: '2026-11-16T09:00:00Z', ended_at: '2026-11-16T10:00:00Z' },
+      { ...base, mode: 'track' as const, category: null, activity_id: 'h-soc', started_at: '2026-11-16T10:00:00Z', ended_at: '2026-11-16T10:30:00Z' },
+    ]
+    const toGroup = () => 'hockey'
+    expect(summariseEntries(entries, now, toGroup).minutesByCategory).toEqual({ hockey: 90 })
+  })
   it('is empty with no entries', () => {
     expect(summariseEntries([], now)).toEqual({
       focusMinutes: 0,

@@ -66,43 +66,81 @@ Runna workouts reach this route as long as they are saved to Apple Health by the
 
 ---
 
-## 2. Time tracking — `POST /api/track`
+## 2. Time tracking — `GET` and `POST /api/track`
 
-For your own quick-capture Shortcuts.
+### The one-button "Track" Shortcut
 
-### Start a category
+One Shortcut that shows your activity list and starts whatever you tap, or stops the timer. The list comes from LifeOS each time, so anything you add or rename in **Settings → What you track time on** shows up without editing the Shortcut.
+
+**Build it (Shortcuts app on the iPhone, new Shortcut, name it "Track"):**
+
+1. **Get Contents of URL** — `https://rc-lifeos.netlify.app/api/track`, Method **GET**, Header `Authorization` = `Bearer <your capture token>`.
+2. **Get Dictionary Value** — Key `options`, from Contents of URL.
+3. **Choose from List** — List: Dictionary Value. Prompt: "Track what?". The first item is always **Stop tracking**; then each group, followed by its parts as "Hockey / Playing".
+4. **Get Contents of URL** — same URL, Method **POST**, same `Authorization` header, Request Body **JSON** with two fields:
+   - `action` (Text) = `pick`
+   - `choice` (Text) = Chosen Item
+5. **Get Dictionary Value** — Key `message`, from Contents of URL.
+6. **Show Notification** — Dictionary Value. You will see "Tracking Hockey · Playing", "Stopped", or why it could not start.
+
+**Putting it one tap away:**
+
+- **Home screen:** in the Shortcut, tap the share icon → *Add to Home Screen*.
+- **Action button** (iPhone 15 Pro and later): Settings → Action Button → Shortcut → Track.
+- **Back Tap:** Settings → Accessibility → Touch → Back Tap → Double Tap → Track.
+- **Control Centre** (iOS 18 and later): edit Control Centre → Add a Control → Shortcuts → Track.
+- **Lock screen:** customise the lock screen → add the Shortcuts widget → Track.
+
+### On the Apple Watch
+
+The same Shortcut runs on the watch. The watch makes the web requests itself, over the paired phone or its own Wi-Fi or mobile data.
+
+1. In the Shortcut on the iPhone, tap the **ⓘ** (details) button → turn on **Show on Apple Watch**.
+2. On the watch, open the **Shortcuts** app and tap Track. The list appears as a scrolling menu; tap one and the notification shows on the wrist.
+3. For one tap from the watch face: long-press the face → Edit → Complications → choose **Shortcuts** → Track.
+4. On Apple Watch Ultra you can also set the **Action button** to run Track (Watch Settings → Action Button → Shortcut).
+
+If the watch shows "couldn't communicate" or similar, the watch could not reach the internet; try again with the phone nearby.
+
+### Direct requests (for other Shortcuts)
+
+Start an activity. `activity` can be "Group / Part", a group or part name that is unique, or one of the older category keys (`meetings`, `deep_work`, …), which still work:
 
 ```json
-{ "action": "start", "category": "meetings", "label": "Standup", "energy": 4 }
+{ "action": "start", "activity": "Hockey / Playing", "label": "Cup match", "energy": 4 }
 ```
 
-`label` and `energy` (1 to 5) are optional. Starting a category ends whatever was being tracked.
+`label` and `energy` (1 to 5) are optional. Starting ends whatever was being tracked.
 
-### Stop
+Stop:
 
 ```json
 { "action": "stop" }
 ```
 
-### Log a finished block ending now
+Pick from the menu (what the Track Shortcut sends; "Stop tracking" stops):
 
 ```json
-{ "action": "log", "category": "admin", "minutes": 30 }
+{ "action": "pick", "choice": "Downtime / TV" }
 ```
 
-`minutes` must be 1 to 240.
+Log a finished block ending now (`minutes` 1 to 240):
 
-### Categories
-
-`deep_work`, `meetings`, `admin`, `reactive`, `procrastinating`, `personal_project`, `learning`, `rest`, `exercise`
+```json
+{ "action": "log", "activity": "Home / Housework", "minutes": 30 }
+```
 
 ### Responses
 
-- `200` `{ "entry": { ... } }`, or for stop `{ "stopped": true, "entry": { ... } }` / `{ "stopped": false }`
-- `400` `{ "error": "..." }` unknown action or category, or minutes out of range
+Every response has a short `message` you can show as a notification.
+
+- `200` `GET` → `{ "options": ["Stop tracking", "Work", "Work / Deep work", …] }`
+- `200` `POST` → `{ "entry": { … }, "message": "Tracking Hockey · Playing" }`, or for stop `{ "stopped": true, … }` / `{ "stopped": false, "message": "Nothing was running" }`
+- `400` `{ "error": "unknown_activity", "options": [ … ] }` the name is not in the list (or is archived, or matches two parts such as "Playing" — send "Hockey / Playing")
+- `400` `{ "error": "..." }` unknown action, missing activity, or minutes out of range
 - `401` wrong or missing token
 - `409` `{ "error": "focus_running" }` a focus session is running; end it in the app first
-- `409` `{ "error": "tracking_running" }` on `log` while something is being tracked; send `stop` first
+- `409` `{ "error": "tracking_running" }` on `log` while something is being tracked; stop first
 - `409` `{ "error": "busy" }` two starts arrived together; send it again
 
 ---

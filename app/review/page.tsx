@@ -6,7 +6,8 @@ import { isOn } from '@/lib/features'
 import { bandCounts, nextAction, type Project, type ProjectTask } from '@/lib/projects'
 import { PROJECT_TASK_COLUMNS } from '@/lib/projects-store'
 import { sentences, weekSummary } from '@/lib/record'
-import { ENTRY_COLUMNS } from '@/lib/time-store'
+import { ENTRY_COLUMNS, getActivities } from '@/lib/time-store'
+import { groupKey } from '@/lib/activities'
 import type { TimeEntry } from '@/lib/types'
 import BottomNav from '@/components/BottomNav'
 import CompleteReviewButton from '@/components/CompleteReviewButton'
@@ -25,7 +26,7 @@ export default async function ReviewPage() {
   const today = londonToday(now)
   const since = addDays(today, -13)
 
-  const [settings, entriesResult, foodResult, logsResult, projectsResult, tasksResult, looseOpen, inbox] =
+  const [settings, entriesResult, foodResult, logsResult, projectsResult, tasksResult, looseOpen, inbox, acts] =
     await Promise.all([
       supabase.from('settings').select('features, last_review_date').eq('id', 1).single(),
       supabase.from('time_entries').select(ENTRY_COLUMNS).gte('day', since).lte('day', today),
@@ -39,14 +40,17 @@ export default async function ReviewPage() {
         .eq('status', 'open')
         .is('project_id', null),
       supabase.from('captures').select('*', { count: 'exact', head: true }).is('triaged_at', null),
+      getActivities(supabase),
     ])
   if (!isOn(settings.data?.features, 'weekly_review')) redirect('/settings')
 
   const entries = (entriesResult.data ?? []) as TimeEntry[]
   const food = foodResult.data ?? []
   const logs = logsResult.data ?? []
-  const current = weekSummary({ days: range(addDays(today, -6), 7), entries, food, logs, now })
-  const previous = weekSummary({ days: range(since, 7), entries, food, logs, now })
+  const keyOf = groupKey(acts)
+  const current = weekSummary({ days: range(addDays(today, -6), 7), entries, food, logs, now, keyOf })
+  const previous = weekSummary({ days: range(since, 7), entries, food, logs, now, keyOf })
+  const nameOf = (key: string) => acts.byId.get(key)?.name ?? key
 
   const projects = ((projectsResult.data ?? []) as Project[]).sort((a, b) => a.name.localeCompare(b.name))
   const tasks = (tasksResult.data ?? []) as ProjectTask[]
@@ -67,7 +71,7 @@ export default async function ReviewPage() {
             1 · Last 7 days
           </h2>
           <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4 space-y-2">
-            {sentences(current, previous).map(line => (
+            {sentences(current, previous, nameOf).map(line => (
               <p key={line} className="text-ink-soft text-sm leading-relaxed">
                 {line}
               </p>

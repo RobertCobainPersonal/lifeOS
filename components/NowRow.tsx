@@ -3,17 +3,19 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { stopEntry } from '@/app/time/actions'
-import { CATEGORIES, elapsedSeconds, formatClock, isOverrun, remainingSeconds } from '@/lib/time'
+import { elapsedSeconds, formatClock, isOverrun, remainingSeconds } from '@/lib/time'
 import type { TimeEntry } from '@/lib/types'
 import { useNow } from '@/components/useNow'
 
 interface NowRowProps {
   entry: TimeEntry | null
+  /** Activity name for a tracked entry, e.g. "Hockey · Playing" */
+  activityName?: string
   serverNowMs: number
 }
 
 /** What is running right now, with Stop; or a quiet link to start tracking. */
-export default function NowRow({ entry, serverNowMs }: NowRowProps) {
+export default function NowRow({ entry, activityName = 'Tracking', serverNowMs }: NowRowProps) {
   const now = useNow(serverNowMs)
   const [error, setError] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -42,7 +44,7 @@ export default function NowRow({ entry, serverNowMs }: NowRowProps) {
   }
 
   const isFocus = entry.mode === 'focus'
-  const name = isFocus ? entry.label ?? 'Focus' : CATEGORIES[entry.category].label
+  const name = isFocus ? entry.label ?? 'Focus' : activityName
   // A focus session that ran out and was never ended can be closed straight from Home
   const overrun = isOverrun(entry, now)
   const clock = overrun
