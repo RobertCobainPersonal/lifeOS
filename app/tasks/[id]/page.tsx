@@ -26,7 +26,7 @@ export default async function TaskDetailPage({
   if (task.status === 'done') redirect('/tasks')
 
   return (
-    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto lg:max-w-3xl lg:box-content lg:pl-56 lg:pr-8">
       <div className="px-4 pt-6 pb-12">
         <Link
           href="/tasks"

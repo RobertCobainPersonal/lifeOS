@@ -50,7 +50,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const doneCount = tasks.filter(t => t.status === 'done').length
 
   return (
-    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto lg:max-w-3xl lg:box-content lg:pl-56 lg:pr-8">
       <div className="px-4 pt-6 pb-24">
         <Link href="/projects" className="text-muted active:text-ink-soft text-sm">
           ← Projects

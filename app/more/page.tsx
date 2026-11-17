@@ -40,7 +40,7 @@ export default async function MorePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto">
+    <div className="min-h-screen bg-paper text-ink max-w-lg mx-auto lg:max-w-3xl lg:box-content lg:pl-56 lg:pr-8">
       <div className="px-4 pt-6 pb-24">
         <h1 className="text-2xl font-bold mb-6">More</h1>
         <div className="flex flex-col gap-3">
