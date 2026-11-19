@@ -2,7 +2,7 @@
 
 **Status:** DRAFT. The endpoints are built and unit-tested. None of the Shortcut steps below have been run on a device.
 
-All four endpoints use the same bearer token as the existing capture Shortcut (`CAPTURE_API_TOKEN`).
+All the endpoints use the same bearer token as the existing capture Shortcut (`CAPTURE_API_TOKEN`).
 
 | Header | Value |
 |--------|-------|
@@ -206,3 +206,76 @@ To cover the week ahead, find events between today and six days from now and set
 ## 4. Capture — `POST /api/capture`
 
 Unchanged. See `docs/superpowers/session-2-deploy-checklist.md`.
+
+---
+
+## 5. Done: say what you got through
+
+One dictation that adds a line to today's Forever Notes daily note **and** saves it to LifeOS (Home, the day close, the weekly review and **More → What I got done**).
+
+### Build it
+New Shortcut, named **Done**.
+
+1. **Dictate Text**. Stop listening: **After Pause**. (On the Mac or if you'd rather type, use **Ask for Input** instead.)
+2. **Your existing Forever Notes step** that appends to today's daily note. Copy it from one of your current Shortcuts and set the text to `✓ ` followed by *Dictated Text*.
+3. **Get Contents of URL**
+   - URL: `https://rc-lifeos.netlify.app/api/done`
+   - Method: **POST**, with the `Authorization` and `Content-Type` headers
+   - Request Body: **JSON**, field `text` (Text) = *Dictated Text*
+4. **Get Dictionary Value**: key `message` → **Show Notification**: *Dictionary Value*. You should see "Logged 1 thing for today".
+
+Say one thing per run ("sent the coverage summary to Marc"). Saying "Done:" at the start is fine; LifeOS strips it. For a list, type one per line (Ask for Input) or use **What I got done → Fill in a day**.
+
+### Put it one tap away
+- ☐ Action button, Back Tap or Control Centre (as for Track). The Action button is the natural home for Done if Track lives on tags.
+- ☐ **Watch:** ⓘ → **Show on Apple Watch**. Dictation works on the wrist. ⚠️ The Forever Notes step may not run on the watch; if it errors there, make a watch copy without step 2.
+- ☐ **Siri:** "Hey Siri, Done" runs it by name.
+
+### Test it
+- ☐ Run it and say "testing the done log". The line appears in today's daily note and under **Got done today** on Home. Remove it in LifeOS with ✕.
+
+---
+
+## 6. 17:30 nudge: "What did you get through today?"
+
+- ☐ Shortcuts → **Automation** → **+** → **Time of Day** → 17:30, Weekdays → **Run Immediately** → choose the **Done** Shortcut.
+- ⚠️ iOS may not open dictation from an automation while the phone is locked. If you just get a notification, tap it to run Done. If nothing appears at all, use a repeating Reminder at 17:30 called "Log what you got done" instead.
+- Missed a whole day? **More → What I got done → Fill in a day**: pick the date and paste or type one item per line. It goes back 30 days.
+
+---
+
+## 7. NFC tags: tap to start timing
+
+Each tag starts one activity, with no menu. Tapping a different tag switches, because starting anything ends what was running.
+
+### Set up one tag (repeat per tag)
+1. Shortcuts → **Automation** → **+** → **NFC** → **Scan**, hold the tag to the top of the phone, and name it (e.g. "Desk").
+2. **Run Immediately**, with **Notify When Run** off.
+3. Choose **New Blank Automation** and add:
+   1. **Get Contents of URL**
+      - URL: `https://rc-lifeos.netlify.app/api/track`
+      - Method: **POST**, with the `Authorization` and `Content-Type` headers
+      - Request Body: **JSON**: `action` (Text) = `start`, `activity` (Text) = the name exactly as it appears in the Track menu, e.g. `Work / Deep work`
+   2. **Get Dictionary Value**: key `message` → **Show Notification**: *Dictionary Value*
+
+For a **Stop** tag, use one field only: `action` (Text) = `stop`.
+
+### Where to put them (fill in as you go)
+
+| Tag | Where | Activity sent |
+|-----|-------|---------------|
+| ☐ Desk | Work desk / home office | `Work / Deep work` |
+| ☐ Kitchen | Fridge or worktop | `Home / Cooking` |
+| ☐ Sofa | Coffee table or remote | `Downtime / TV` |
+| ☐ Hockey bag | Inside the bag | `Hockey / Playing` |
+| ☐ Golf bag | Inside the bag | `Golf / Playing` |
+| ☐ Front door | By the door | stop |
+
+### Test it
+- ☐ Tap the Desk tag. The notification reads "Tracking Work · Deep work" and the timer shows in LifeOS.
+- ☐ Tap the Kitchen tag. It switches to "Home · Cooking".
+- ☐ Tap the Front door tag. "Stopped".
+
+⚠️ NFC automations only run while the phone is unlocked, and the tag has to touch the top edge of the phone. If you rename an activity in Settings, update the tag's `activity` text to match. The Track menu updates itself, but tags don't.
+
+---

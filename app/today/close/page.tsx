@@ -8,6 +8,7 @@ import { activityKey, breakdown, groupKey } from '@/lib/activities'
 import { dayTotals } from '@/lib/fuel'
 import { ENTRY_COLUMNS, getActivities } from '@/lib/time-store'
 import type { TimeEntry } from '@/lib/types'
+import DoneList from '@/components/DoneList'
 import CloseoutForm from '@/components/CloseoutForm'
 
 function formatMinutes(minutes: number): string {
@@ -27,7 +28,7 @@ export default async function ClosePage() {
   const today = londonToday(now)
   const tomorrow = addDays(today, 1)
 
-  const [dayLog, settings, entriesResult, openTasks, doneToday, tomorrowLog, food] = await Promise.all([
+  const [dayLog, settings, entriesResult, openTasks, doneToday, tomorrowLog, food, doneLog] = await Promise.all([
     getOrCreateDayLog(supabase, today),
     supabase.from('settings').select('journal_prompts').eq('id', 1).single(),
     supabase.from('time_entries').select(ENTRY_COLUMNS).eq('day', today),
@@ -43,6 +44,7 @@ export default async function ClosePage() {
       .gte('completed_at', londonDayStartIso(today)),
     supabase.from('day_log').select('one_thing_task_id').eq('day', tomorrow).maybeSingle(),
     supabase.from('food_entries').select('kcal, protein_g').eq('day', today),
+    supabase.from('done_entries').select('id, text').eq('day', today).order('created_at'),
   ])
   const foodEntries = food.data ?? []
   const fuel = dayTotals(foodEntries)
@@ -98,6 +100,15 @@ export default async function ClosePage() {
               {dayLog.protein_target ? ` of ${dayLog.protein_target}` : ''} g protein
             </p>
           )}
+        </section>
+
+        <section className="mb-6" aria-labelledby="got-done">
+          <h2 id="got-done" className="text-xs font-semibold text-muted uppercase tracking-wide mb-2 px-1">
+            What did you get through today?
+          </h2>
+          <div className="bg-card ring-1 ring-line rounded-xl px-4 py-3">
+            <DoneList items={doneLog.data ?? []} emptyHint="Worth a minute: list what you got through, however small." />
+          </div>
         </section>
 
         <CloseoutForm
