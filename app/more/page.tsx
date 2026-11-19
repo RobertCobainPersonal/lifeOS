@@ -31,6 +31,7 @@ export default async function MorePage() {
     { href: '/projects', label: 'Projects' },
     { href: '/clickup', label: 'Work (ClickUp)' },
     { href: '/slipping', label: 'Slipping', note: slippingCount > 0 ? String(slippingCount) : undefined },
+    { href: '/done', label: 'What I got done' },
     { href: '/time', label: 'Track time' },
     { href: '/record', label: 'Record' },
     ...(isOn(settings.data?.features, 'weekly_review') ? [{ href: '/review', label: 'Weekly review' }] : []),

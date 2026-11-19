@@ -27,6 +27,7 @@ import AdminBatch from '@/components/AdminBatch'
 import MorningPlan from '@/components/MorningPlan'
 import ResetMyDay from '@/components/ResetMyDay'
 import NewTaskForm from '@/components/NewTaskForm'
+import DoneList from '@/components/DoneList'
 
 export default async function TodayPage() {
   const supabase = await createClient()
@@ -69,6 +70,7 @@ export default async function TodayPage() {
     ticksResult,
     sleepResult,
     peopleResult,
+    doneResult,
   ] = await Promise.all([
     supabase
       .from('tasks')
@@ -145,7 +147,9 @@ export default async function TodayPage() {
       : Promise.resolve({
           data: [] as { name: string; cadence_days: number; last_contact: string | null; created_at: string }[],
         }),
+    supabase.from('done_entries').select('id, text').eq('day', today).order('created_at'),
   ])
+  const doneToday = doneResult.data ?? []
 
   const allOpen = allOpenResult.data ?? []
   const fuel = dayTotals(foodResult.data ?? [])
@@ -366,6 +370,20 @@ export default async function TodayPage() {
             </section>
 
             <NewTaskForm />
+
+            <section className="mb-6" aria-labelledby="done-today">
+              <div className="flex items-baseline justify-between mb-2 px-1">
+                <h2 id="done-today" className="text-xs font-semibold text-muted uppercase tracking-wide">
+                  Got done today
+                </h2>
+                <Link href="/done" className="text-xs text-muted active:text-ink-soft">
+                  All →
+                </Link>
+              </div>
+              <div className="bg-card ring-1 ring-line rounded-xl px-4 py-3">
+                <DoneList items={doneToday} emptyHint="Add anything you get through, big or small." />
+              </div>
+            </section>
 
             <div className="lg:hidden">
               <NonNegotiables items={nonNegotiables} />

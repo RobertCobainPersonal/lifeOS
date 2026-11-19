@@ -8,6 +8,8 @@ import { PROJECT_TASK_COLUMNS } from '@/lib/projects-store'
 import { sentences, weekSummary } from '@/lib/record'
 import { ENTRY_COLUMNS, getActivities } from '@/lib/time-store'
 import { groupKey } from '@/lib/activities'
+import { asText, dayHeading, groupByDay, type DoneEntry } from '@/lib/done'
+import CopyText from '@/components/CopyText'
 import type { TimeEntry } from '@/lib/types'
 import BottomNav from '@/components/BottomNav'
 import CompleteReviewButton from '@/components/CompleteReviewButton'
@@ -26,7 +28,7 @@ export default async function ReviewPage() {
   const today = londonToday(now)
   const since = addDays(today, -13)
 
-  const [settings, entriesResult, foodResult, logsResult, projectsResult, tasksResult, looseOpen, inbox, acts] =
+  const [settings, entriesResult, foodResult, logsResult, projectsResult, tasksResult, looseOpen, inbox, acts, doneResult] =
     await Promise.all([
       supabase.from('settings').select('features, last_review_date').eq('id', 1).single(),
       supabase.from('time_entries').select(ENTRY_COLUMNS).gte('day', since).lte('day', today),
@@ -41,6 +43,11 @@ export default async function ReviewPage() {
         .is('project_id', null),
       supabase.from('captures').select('*', { count: 'exact', head: true }).is('triaged_at', null),
       getActivities(supabase),
+      supabase
+        .from('done_entries')
+        .select('id, day, text, created_at')
+        .gte('day', addDays(today, -6))
+        .order('created_at'),
     ])
   if (!isOn(settings.data?.features, 'weekly_review')) redirect('/settings')
 
@@ -51,6 +58,8 @@ export default async function ReviewPage() {
   const current = weekSummary({ days: range(addDays(today, -6), 7), entries, food, logs, now, keyOf })
   const previous = weekSummary({ days: range(since, 7), entries, food, logs, now, keyOf })
   const nameOf = (key: string) => acts.byId.get(key)?.name ?? key
+  const doneWeek = groupByDay((doneResult.data ?? []) as DoneEntry[])
+  const doneCount = doneWeek.reduce((n, g) => n + g.items.length, 0)
 
   const projects = ((projectsResult.data ?? []) as Project[]).sort((a, b) => a.name.localeCompare(b.name))
   const tasks = (tasksResult.data ?? []) as ProjectTask[]
@@ -76,6 +85,29 @@ export default async function ReviewPage() {
                 {line}
               </p>
             ))}
+          </div>
+          <div className="bg-card ring-1 ring-line rounded-xl px-4 py-4 mt-3">
+            <div className="flex items-baseline justify-between mb-1">
+              <h3 className="text-sm font-medium text-ink">
+                Got done: {doneCount === 0 ? 'nothing logged' : `${doneCount} thing${doneCount === 1 ? '' : 's'}`}
+              </h3>
+              {doneCount > 0 && <CopyText text={asText(doneWeek)} />}
+            </div>
+            {doneWeek.map(g => (
+              <div key={g.day} className="pt-2">
+                <p className="text-xs text-muted">{dayHeading(g.day)}</p>
+                <ul>
+                  {g.items.map(i => (
+                    <li key={i.id} className="text-sm text-ink-soft py-0.5">
+                      ✓ {i.text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            <Link href="/done" className="inline-block text-sm text-muted underline underline-offset-2 mt-3">
+              {doneCount === 0 ? 'Fill in the week' : 'Add or fill in a missed day'}
+            </Link>
           </div>
         </section>
 
