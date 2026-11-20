@@ -182,7 +182,7 @@ export default async function SettingsPage() {
           </div>
           {hasClickUp && (
             <p className="text-faint text-xs mt-2 px-1">
-              Syncs when you open the ClickUp page. To reconnect, update CLICKUP_API_TOKEN in your environment.
+              Choose which lists and tasks to follow on <Link href="/clickup" className="underline underline-offset-2">Work (ClickUp)</Link>. They refresh each time you open it.
             </p>
           )}
         </section>
